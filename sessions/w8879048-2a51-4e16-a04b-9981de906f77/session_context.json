@@ -1,0 +1,310 @@
+{
+    "id": "w8879048-2a51-4e16-a04b-9981de906f77",
+    "deps": {
+        "artifacts": {
+            "metadata.json": {
+                "title": "Creating Skills in RovoDev",
+                "is_manual_title": false,
+                "fork_data": null,
+                "workspace_path": "/root",
+                "bookmarks": []
+            }
+        }
+    },
+    "message_history": [
+        {
+            "parts": [
+                {
+                    "content": "You are \"Rovo Dev\" - a friendly and helpful AI agent that can help software developers with their tasks. If asked what LLM you are based on, you may answer with the provider and model family but not the specific version.\n\nYou are an expert software development assistant tasked with performing operations against a workspace to resolve a problem statement. You will require multiple iterations to explore the workspace and make changes, using only the available functions.\n\nYou will be given access to the files in the workspace and a shell (bash or powershell, depending on the platform) to execute commands.\n\nGuidelines:\n- Work exclusively within the provided workspace. Do not attempt to access or modify files outside the workspace. Bash or powershell commands will automatically be executed in the workspace directory, so there is no need to change directories. DO NOT run commands like `cd /workspace && ...` - you are already in the correct directory.\n- After receiving tool results, carefully reflect on their quality and determine optimal next steps before proceeding. Use your thinking to plan and iterate based on this new information, and then take the best next action.\n- Speed up your solution by testing only the relevant parts of the code base. You do not need to fix issues and failures that are unrelated to the problem statement or your changes.\n- If you create any temporary new files, scripts, or helper files for iteration, clean up these files by removing them at the end of the task. All temporary files created for testing purposes should be named with a prefix of \"tmp_rovodev_\"\n- Please write a high quality, general purpose solution. Implement a solution that works correctly for all valid inputs, not just the test cases. Do not hard-code values or create solutions that only work for specific test inputs. Instead, implement the actual logic that solves the problem generally.\n- Focus on understanding the problem requirements and implementing the correct algorithm. Tests are there to verify correctness, not to define the solution. Provide a principled implementation that follows best practices and software design principles.\n- For maximum efficiency, whenever you need to perform multiple independent operations, invoke all relevant tools simultaneously rather than sequentially.\n- Do not use bash/powershell commands to perform actions that can be completed with the other provided functions.\n- Resolve the provided task as efficiently as possible. Make the most out of each iteration by making simultaneous tool calls as described above and by focusing on targetted testing.\n\nExplanation of available tools:\n- open_files: Opens a set of files in the workspace. Large files will be shown in a \"collapsed\" state, where the bodies of functions and methods are hidden. Smaller files will be shown in full.\n- expand_code_chunks: Shown the content of a single file with specified symbols or line ranges expanded. This function shows the exact same output as open_files for smaller files. For large files, it shows the same output as open_files but with the specified symbols or line ranges expanded in the collapsed view. DO NOT call open_files and expand_code_chunks unnecessarily on the same file if you have already viewed the expanded content.\n- grep: Searches for a pattern in the content of files in the workspace.\n- find_and_replace_code, create_file, delete_file, move_file: These functions enable you to modify the codebase. Use them instead of shell equivalents, unless otherwise instructed.\n- bash/powershell: Executes a shell command in the workspace directory. Commands will be executed at the root of the workspace by default, so there is no need to change directories.\n- MCP server tools: You may have access to additional tools via MCP servers, accessible via mcp__*__get_tool_schema and mcp__*__invoke_tool functions. These tools provide specialized functionality that may help you gather context and complete your task. Before calling mcp__*__invoke_tool, ALWAYS first call mcp__*__get_tool_schema to get important information about the tools being called.\n- Skills: You may have access to specialized skills that provide additional functionality or guidance. If you have access to a skill that is relevant to the task, you should always load the skill with get_skill when working on the\ntask.\n\nTool results and user messages may include <system-reminder> tags. <system-reminder> tags contain useful information and reminders. They are automatically added by the system, and bear no direct relation to the specific tool results or user messages in which they appear.\n\nImportant:\n- Aim to solve tasks in a \"token-efficient\" manner. This can be done by calling tools simultaneously, and avoiding calling expand_code_chunks and open_files on a file that has already been opened and expanded - you can just inspect the content of the file in the previous tool output.\n- You will be provided with the number of iterations you have consumed at each step. As a guide, here are the number of iterations you should expect to consume for different types of tasks:\n    - Simple tasks (e.g. explanation request, specific localized change that doesn't require tests): ~10 iterations or fewer.\n    - Medium tasks (e.g. implementing a new feature, fixing a bug that requires some investigation): ~20 iterations.\n    - Complex tasks (e.g. refactoring, fixing difficult bugs, implementing complex features): ~30 iterations. Never use more than 30 iterations for a single request from the user.\n    - Minor follow-up tasks (e.g., adjustments to your initial solution): ~10 iterations.\n- Based on the provided issue or request, aim to resolve the task in an appropriate number of iterations, but do not compromise on quality or end early just to save iterations. If you need more iterations than expected, that's okay.\n\nYou are currently in interactive mode. You can ask questions and additional inputs from the user when needed.\nBut before you do that, you should use the tools available to try getting the information you need by yourself.\n\nInclude a simple natural language description of your status before each logical group of actions. Make this feel like a natural part of the conversation, not a separate status update.\n\nWhen you respond to the user, always end your message with a question for what to do next, ideally with a few sensible options.\n\n## Important: Markdown File Creation Guidance\n\nDo NOT create `.md` files unless explicitly requested by the user. This applies when:\n- Documenting plans or decisions (stream to console instead)\n- Creating notes or analysis (provide directly in response)\n- Summarizing work (include in response)\n\nOnly create `.md` files when explicitly asked by the user.\nAvoid duplicating content across console output and `.md` files.",
+                    "timestamp": "2026-03-31T08:22:36.860740Z",
+                    "dynamic_ref": "system_prompt_efficient_instructions",
+                    "part_kind": "system-prompt"
+                },
+                {
+                    "content": "\n\nHere is the current workspace:\n<workspace>\nacli\n.bashrc\n.ICEauthority\n.profile\n.wget-hsts\n.Xauthority\n.xorgxrdp.10.log\n.xsession-errors\n\n.ansible/:\n\n.ansible/tmp/: (COLLAPSED)\n\n.azure-devops/:\n\n.azure-devops/python-sdk/:\n\n.azure-devops/python-sdk/cache/: (COLLAPSED)\n\n.azure/:\naz.json\naz.sess\nazureProfile.json\ncommandIndex.json\nconfig\nversionCheck.json\n\n.azure/azuredevops/:\n\n.azure/azuredevops/cache/: (COLLAPSED)\n\n.azure/commands/:\n2026-03-23.21-19-28.extension_add.14203.log\n2026-03-23.21-19-39.devops.14316.log\n\n.azure/telemetry/: (COLLAPSED)\n\n.cache/:\n\n.cache/code-nautilus/: (COLLAPSED)\n\n.cache/code-nemo/: (COLLAPSED)\n\n.cache/evolution/:\n\n.cache/evolution/addressbook/:\n\n.cache/evolution/addressbook/trash/: (COLLAPSED)\n\n.cache/evolution/calendar/:\n\n.cache/evolution/calendar/trash/: (COLLAPSED)\n\n.cache/evolution/mail/:\n\n.cache/evolution/mail/trash/: (COLLAPSED)\n\n.cache/evolution/memos/:\n\n.cache/evolution/memos/trash/: (COLLAPSED)\n\n.cache/evolution/sources/:\n\n.cache/evolution/sources/trash/: (COLLAPSED)\n\n.cache/evolution/tasks/:\n\n.cache/evolution/tasks/trash/: (COLLAPSED)\n\n.cache/gstreamer-1.0/:\nregistry.x86_64.bin\n\n.cache/ibus/:\ndbus-bGUq7fme\n\n.cache/ibus/bus/:\nregistry\n\n.cache/sessions/: (COLLAPSED)\n\n.cache/xfce4/:\n\n.cache/xfce4/notifyd/:\nlog.sqlite\n\n.conda/:\nenvironments.txt\n\n.config/:\n\n.config/acli/:\nadmin_config.yaml\nassets_config.yaml\nbrie_config.yaml\nconfluence_config.yaml\nglobal_auth_config.yaml\nglobal_config.yaml\njira_config.yaml\nrovodev_config.yaml\n\n.config/.android/:\n\n.config/.android/cache/:\nsdkbin-1_029182a5-sys-img2-3_xml\nsdkbin-1_02c91cf8-sys-img2-3_xml\nsdkbin-1_2193743a-addon2-3_xml\nsdkbin-1_3ba9aebd-sys-img2-3_xml\nsdkbin-1_4842592b-sys-img2-3_xml\nsdkbin-1_53ed092d-addon2-3_xml\nsdkbin-1_67805722-sys-img2-3_xml\nsdkbin-1_6dc81d35-sys-img2-3_xml\nsdkbin-1_705f9c93-sys-img2-3_xml\nsdkbin-1_72765e83-sys-img2-3_xml\nsdkbin-1_75698f08-sys-img2-3_xml\nsdkbin-1_8f346d54-sys-img2-3_xml\nsdkbin-1_a36dd23c-sys-img2-3_xml\nsdkbin-1_b743781d-repository2-2_xml\nsdkbin-1_b7518f9e-repository2-3_xml\nsdkbin-1_bda0cd14-sys-img2-3_xml\nsdkbin-1_c44bfcd2-sys-img2-3_xml\nsdkbin-1_d1d90657-sys-img2-3_xml\nsdkbin-1_d2b9d222-addons_list-5_xml\nsdkbin-1_da343b6b-sys-img2-3_xml\nsdkbin-1_df10ac17-sys-img2-3_xml\nsdkinf-1_029182a5-sys-img2-3_xml\nsdkinf-1_02c91cf8-sys-img2-3_xml\nsdkinf-1_2193743a-addon2-3_xml\nsdkinf-1_3ba9aebd-sys-img2-3_xml\nsdkinf-1_4842592b-sys-img2-3_xml\nsdkinf-1_53ed092d-addon2-3_xml\nsdkinf-1_67805722-sys-img2-3_xml\nsdkinf-1_6dc81d35-sys-img2-3_xml\nsdkinf-1_705f9c93-sys-img2-3_xml\nsdkinf-1_72765e83-sys-img2-3_xml\nsdkinf-1_75698f08-sys-img2-3_xml\nsdkinf-1_8f346d54-sys-img2-3_xml\nsdkinf-1_a36dd23c-sys-img2-3_xml\nsdkinf-1_b743781d-repository2-2_xml\nsdkinf-1_b7518f9e-repository2-3_xml\nsdkinf-1_bda0cd14-sys-img2-3_xml\nsdkinf-1_c44bfcd2-sys-img2-3_xml\nsdkinf-1_d1d90657-sys-img2-3_xml\nsdkinf-1_d2b9d222-addons_list-5_xml\nsdkinf-1_da343b6b-sys-img2-3_xml\nsdkinf-1_df10ac17-sys-img2-3_xml\n\n.config/gcloud/:\nactive_config\ngce\n.last_survey_prompt.yaml\n\n.config/gcloud/configurations/:\nconfig_default\n\n.config/powershell/:\nprofile.ps1\n\nDesktop/: (COLLAPSED)\n\nDocuments/: (COLLAPSED)\n\n.dotnet/:\n10.0.201.aspNetCertificateSentinel\n10.0.201.dotnetFirstUseSentinel\n10.0.201.toolpath.sentinel\n\n.dotnet/corefx/:\n\n.dotnet/corefx/cryptography/:\n\n.dotnet/corefx/cryptography/crls/:\n13b84f1f.c6cd80be.crl\n1c3b872e.5a4bc823.crl\n75d1b2ed.de05bb98.crl\n90d59fad.b1aa5d5a.crl\na4596d83.008256e2.crl\ncf887acb.0f995861.crl\nd16da424.cbeb964c.crl\n\n.dotnet/corefx/cryptography/x509stores/:\n\n.dotnet/corefx/cryptography/x509stores/my/:\n63377FBAA080798A7D82BF663AD7C68AFA28E836.pfx\n\nDownloads/: (COLLAPSED)\n\n.gnupg/:\n\n.gnupg/private-keys-v1.d/: (COLLAPSED)\n\n.gradle/:\n\n.gradle/native/:\n\n.gradle/native/660c5614fbf4a5f2a75b1949f50a0caf5cd603558e7d8a26e50b933a0cfb79d1/:\n\n.gradle/native/660c5614fbf4a5f2a75b1949f50a0caf5cd603558e7d8a26e50b933a0cfb79d1/linux-amd64-ncurses5/:\nlibnative-platform-curses.so\nlibnative-platform-curses.so.lock\n\n.gradle/native/660c5614fbf4a5f2a75b1949f50a0caf5cd603558e7d8a26e50b933a0cfb79d1/linux-amd64-ncurses6/:\nlibnative-platform-curses.so\nlibnative-platform-curses.so.lock\n\n.gradle/native/660c5614fbf4a5f2a75b1949f50a0caf5cd603558e7d8a26e50b933a0cfb79d1/linux-amd64/:\nlibnative-platform.so\nlibnative-platform.so.lock\n\n.gradle/native/jansi/:\n\n.gradle/native/jansi/2.4.2/:\n\n.gradle/native/jansi/2.4.2/Linux/:\n\n.gradle/native/jansi/2.4.2/Linux/x86_64/:\nlibjansi.so\n\n.gradle/notifications/:\n\n.gradle/notifications/9.4.1/:\nrelease-features.rendered\n\n.gradle/.tmp/: (COLLAPSED)\n\n.kilo/:\n\n.kilo/bin/:\nkilo\n\n.launchpadlib/:\n\n.launchpadlib/api.launchpad.net/:\n\n.launchpadlib/api.launchpad.net/cache/:\napi.launchpad.net,devel,-application,json,fc4e1e3a03117146fb1e9d492ab76690\napi.launchpad.net,devel,-application,vnd.sun.wadl+xml,2f09acb494bdefdbf8ef0d1396a05e86\napi.launchpad.net,devel,~git-core,+archive,ubuntu,ppa,ws.op=getSigningKeyData-application,json,35b164ede2d79b6dd6d87e81cd2a0ebd\napi.launchpad.net,devel,~git-core,name=%22ppa%22&ws.op=getPPAByName-application,json,2aa46ec64c03149caf9ca3cff9131810\n\n.local/:\n\n.local/share/:\n\n.local/share/acli/:\n\n.local/share/acli/1.3.15-stable/:\n\n.local/share/acli/1.3.15-stable/plugin/:\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/:\natlassian_cli_rovodev\nmetadata.json\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/git-ai/:\ngit-ai\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/git-ai/v2/: (COLLAPSED)\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/lib/:\n_cffi_backend.cpython-313-x86_64-linux-gnu.so\nlibavif-4aef22a8.so.16.3.0\nlibbrotlicommon-c43ca8d5.so.1.2.0\nlibbrotlidec-2b4e35de.so.1.2.0\nlibfreetype-0270cf46.so.6.20.4\nlibgcc_s.so.1\nlibharfbuzz-a4519404.so.0.61230.0\nlibjpeg-75b54ace.so.62.4.0\nliblcms2-930c9228.so.2.0.17\nliblzma-a2d4f2a9.so.5.8.2\nlibopenjp2-a0b2093f.so.2.5.4\nlibpng16-0676a17f.so.16.53.0\nlibpython3.13.so.1.0\nlibsharpyuv-f85d91c0.so.0.1.2\nlibstdc++.so.6\nlibtiff-56c1bbc6.so.6.2.0\nlibwebp-15463320.so.7.2.0\nlibwebpdemux-65067297.so.2.0.17\nlibwebpmux-83c74882.so.3.1.2\nlibXau-00ec42fe.so.6.0.0\nlibxcb-46a603a8.so.1.1.0\nlibz.so.1\nlibzstd-96175704.so.1.5.7\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/lib/_tcl_data/: (COLLAPSED)\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/lib/_tk_data/: (COLLAPSED)\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/lib/aiohttp/: (COLLAPSED)\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/lib/atlassian_cli_rovodev-0.13.65.dist-info/: (COLLAPSED)\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/lib/attrs-25.4.0.dist-info/: (COLLAPSED)\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/lib/autogen_core-0.7.5.dist-info/: (COLLAPSED)\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/lib/autogen_ext-0.7.5.dist-info/: (COLLAPSED)\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/lib/cachecontrol-0.14.4.dist-info/: (COLLAPSED)\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/lib/certifi/: (COLLAPSED)\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/lib/charset_normalizer/: (COLLAPSED)\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/lib/click-8.3.1.dist-info/: (COLLAPSED)\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/lib/cryptography-46.0.4.dist-info/: (COLLAPSED)\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/lib/cryptography/: (COLLAPSED)\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/lib/Cython/: (COLLAPSED)\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/lib/dateutil/: (COLLAPSED)\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/lib/docker-7.1.0.dist-info/: (COLLAPSED)\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/lib/frozenlist/: (COLLAPSED)\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/lib/genai_prices-0.0.52.dist-info/: (COLLAPSED)\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/lib/google/: (COLLAPSED)\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/lib/grpc/: (COLLAPSED)\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/lib/humanize-4.15.0.dist-info/: (COLLAPSED)\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/lib/ignore/: (COLLAPSED)\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/lib/importlib_metadata-8.7.1.dist-info/: (COLLAPSED)\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/lib/jiter/: (COLLAPSED)\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/lib/jsonschema-4.26.0.dist-info/: (COLLAPSED)\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/lib/jsonschema/: (COLLAPSED)\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/lib/jsonschema_specifications/: (COLLAPSED)\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/lib/keyring-25.7.0.dist-info/: (COLLAPSED)\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/lib/librt/: (COLLAPSED)\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/lib/logfire-3.25.0.dist-info/: (COLLAPSED)\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/lib/markupsafe-3.0.3.dist-info/: (COLLAPSED)\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/lib/markupsafe/: (COLLAPSED)\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/lib/mcp-1.26.0.dist-info/: (COLLAPSED)\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/lib/msgpack/: (COLLAPSED)\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/lib/multidict/: (COLLAPSED)\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/lib/mypy/: (COLLAPSED)\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/lib/nautilus/: (COLLAPSED)\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/lib/nemo/: (COLLAPSED)\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/lib/opentelemetry_api-1.35.0.dist-info/: (COLLAPSED)\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/lib/opentelemetry_exporter_otlp-1.35.0.dist-info/: (COLLAPSED)\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/lib/opentelemetry_exporter_otlp_proto_grpc-1.35.0.dist-info/: (COLLAPSED)\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/lib/opentelemetry_exporter_otlp_proto_http-1.35.0.dist-info/: (COLLAPSED)\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/lib/opentelemetry_instrumentation-0.56b0.dist-info/: (COLLAPSED)\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/lib/opentelemetry_sdk-1.35.0.dist-info/: (COLLAPSED)\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/lib/orjson/: (COLLAPSED)\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/lib/PIL/: (COLLAPSED)\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/lib/pillow.libs/: (COLLAPSED)\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/lib/prompt_toolkit-3.0.52.dist-info/: (COLLAPSED)\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/lib/propcache/: (COLLAPSED)\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/lib/pydantic-2.12.5.dist-info/: (COLLAPSED)\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/lib/pydantic_ai_slim-1.49.0.dist-info/: (COLLAPSED)\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/lib/pydantic_core/: (COLLAPSED)\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/lib/python3.13/: (COLLAPSED)\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/lib/rapidfuzz/: (COLLAPSED)\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/lib/regex/: (COLLAPSED)\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/lib/release-notes/: (COLLAPSED)\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/lib/rovodev/: (COLLAPSED)\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/lib/rovodev_tui/: (COLLAPSED)\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/lib/rpds/: (COLLAPSED)\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/lib/sentry_sdk-2.52.0.dist-info/: (COLLAPSED)\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/lib/setuptools/: (COLLAPSED)\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/lib/tcl9/: (COLLAPSED)\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/lib/textual-8.1.1.dist-info/: (COLLAPSED)\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/lib/textual_serve-1.1.3.dist-info/: (COLLAPSED)\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/lib/textual_serve/: (COLLAPSED)\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/lib/tiktoken/: (COLLAPSED)\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/lib/tqdm-4.67.3.dist-info/: (COLLAPSED)\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/lib/tree_sitter/: (COLLAPSED)\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/lib/tree_sitter_c_sharp/: (COLLAPSED)\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/lib/tree_sitter_embedded_template/: (COLLAPSED)\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/lib/tree_sitter_language_pack/: (COLLAPSED)\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/lib/tree_sitter_yaml/: (COLLAPSED)\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/lib/urllib3-2.6.3.dist-info/: (COLLAPSED)\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/lib/uuid_utils/: (COLLAPSED)\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/lib/watchfiles/: (COLLAPSED)\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/lib/wcwidth/: (COLLAPSED)\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/lib/websockets-15.0.1.dist-info/: (COLLAPSED)\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/lib/websockets/: (COLLAPSED)\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/lib/wrapt/: (COLLAPSED)\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/lib/xxhash/: (COLLAPSED)\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/lib/yaml/: (COLLAPSED)\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/lib/yarl/: (COLLAPSED)\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/lib/zstandard/: (COLLAPSED)\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/ripgrep/:\nCOPYING\nLICENSE-MIT\nREADME.md\nrg\nUNLICENSE\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/ripgrep/complete/: (COLLAPSED)\n\n.local/share/acli/1.3.15-stable/plugin/rovodev/ripgrep/doc/: (COLLAPSED)\n\n.local/share/applications/:\nmimeapps.list\n\n.local/share/evolution/:\n\n.local/share/evolution/addressbook/:\n\n.local/share/evolution/addressbook/system/:\ncontacts.db\n\n.local/share/evolution/addressbook/system/photos/: (COLLAPSED)\n\n.local/share/evolution/addressbook/trash/: (COLLAPSED)\n\n.local/share/evolution/calendar/:\n\n.local/share/evolution/calendar/system/: (COLLAPSED)\n\n.local/share/evolution/calendar/trash/: (COLLAPSED)\n\n.local/share/evolution/mail/:\n\n.local/share/evolution/mail/trash/: (COLLAPSED)\n\n.local/share/evolution/memos/:\n\n.local/share/evolution/memos/trash/: (COLLAPSED)\n\n.local/share/evolution/tasks/:\n\n.local/share/evolution/tasks/system/:\ntasks.ics\n\n.local/share/evolution/tasks/trash/: (COLLAPSED)\n\n.local/share/gem/:\n\n.local/share/gem/specs/:\n\n.local/share/gem/specs/index.rubygems.org%443/:\n\n.local/share/gem/specs/index.rubygems.org%443/quick/:\n\n.local/share/gem/specs/index.rubygems.org%443/quick/Marshal.4.8/:\nabbrev-0.1.2.gemspec\naddressable-2.8.9.gemspec\nartifactory-3.0.17.gemspec\natomos-0.1.3.gemspec\naws-eventstream-1.4.0.gemspec\naws-partitions-1.1229.0.gemspec\naws-sdk-core-3.244.0.gemspec\naws-sdk-kms-1.123.0.gemspec\naws-sdk-s3-1.217.0.gemspec\naws-sigv4-1.12.1.gemspec\nbabosa-1.0.4.gemspec\nbase64-0.2.0.gemspec\nCFPropertyList-3.0.8.gemspec\nclaide-1.1.0.gemspec\ncolored-1.2.gemspec\ncolored2-3.1.2.gemspec\ncommander-4.6.0.gemspec\ncsv-3.3.5.gemspec\ndeclarative-0.0.20.gemspec\ndigest-crc-0.7.0.gemspec\ndomain_name-0.6.20240107.gemspec\ndotenv-2.8.1.gemspec\nemoji_regex-3.2.3.gemspec\nexcon-0.112.0.gemspec\nfaraday-1.10.5.gemspec\nfaraday-cookie_jar-0.0.8.gemspec\nfaraday-em_http-1.0.0.gemspec\nfaraday-em_synchrony-1.0.1.gemspec\nfaraday-excon-1.1.0.gemspec\nfaraday-httpclient-1.0.1.gemspec\nfaraday-multipart-1.2.0.gemspec\nfaraday-net_http-1.0.2.gemspec\nfaraday-net_http_persistent-1.2.0.gemspec\nfaraday-patron-1.0.0.gemspec\nfaraday-rack-1.0.0.gemspec\nfaraday-retry-1.0.4.gemspec\nfaraday_middleware-1.2.1.gemspec\nfastimage-2.4.1.gemspec\nfastlane-2.232.2.gemspec\nfastlane-sirp-1.0.0.gemspec\ngh_inspector-1.1.3.gemspec\ngoogle-apis-androidpublisher_v3-0.98.0.gemspec\ngoogle-apis-core-0.18.0.gemspec\ngoogle-apis-iamcredentials_v1-0.26.0.gemspec\ngoogle-apis-playcustomapp_v1-0.17.0.gemspec\ngoogle-apis-storage_v1-0.61.0.gemspec\ngoogle-cloud-core-1.8.0.gemspec\ngoogle-cloud-env-2.1.1.gemspec\ngoogle-cloud-errors-1.6.0.gemspec\ngoogle-cloud-storage-1.58.0.gemspec\ngoogleauth-1.11.2.gemspec\nhighline-2.0.3.gemspec\nhttp-cookie-1.0.8.gemspec\nhttpclient-2.9.0.gemspec\njmespath-1.6.2.gemspec\njwt-2.10.2.gemspec\nlogger-1.7.0.gemspec\nmini_magick-4.13.2.gemspec\nmini_mime-1.1.5.gemspec\nmulti_json-1.19.1.gemspec\nmultipart-post-2.4.1.gemspec\nmutex_m-0.3.0.gemspec\nnanaimo-0.4.0.gemspec\nnaturally-2.3.0.gemspec\nnkf-0.2.0.gemspec\nos-1.1.4.gemspec\nplist-3.7.2.gemspec\npublic_suffix-7.0.5.gemspec\nrepresentable-3.2.0.gemspec\nretriable-3.4.1.gemspec\nrexml-3.4.4.gemspec\nrouge-3.28.0.gemspec\nrubyzip-2.4.1.gemspec\nsecurity-0.1.5.gemspec\nsignet-0.21.0.gemspec\nsimctl-1.6.10.gemspec\nsysrandom-1.0.5.gemspec\nterminal-notifier-2.0.0.gemspec\nterminal-table-3.0.2.gemspec\ntrailblazer-option-0.1.2.gemspec\ntty-cursor-0.7.1.gemspec\ntty-screen-0.8.2.gemspec\ntty-spinner-0.9.3.gemspec\nuber-0.1.0.gemspec\nunicode-display_width-2.6.0.gemspec\nword_wrap-1.0.0.gemspec\nxcodeproj-1.27.0.gemspec\nxcpretty-0.4.1.gemspec\nxcpretty-travis-formatter-1.0.1.gemspec\n\n.local/share/gvfs-metadata/:\nhome\nhome-ba60a194.log\n\n.local/share/icc/: (COLLAPSED)\n\n.local/share/keyrings/: (COLLAPSED)\n\n.local/share/man/: (COLLAPSED)\n\n.local/share/NuGet/:\n\n.local/share/NuGet/http-cache/:\n\n.local/share/NuGet/http-cache/670c1461c29885f9aa22c281d8b7da90845b38e4$ps:_api.nuget.org_v3_index.json/:\nrepository_signatures_5.0.0.dat\nservice_index.dat\n\n.local/share/NuGet/Migrations/:\n1\n\n.local/share/powershell/:\n\n.local/share/powershell/Modules/:\n\n.local/share/powershell/Modules/PackageManagement/:\n\n.local/share/powershell/Modules/PackageManagement/1.4.8.1/:\nPackageManagement.format.ps1xml\nPackageManagement.psd1\nPackageManagement.psm1\nPackageManagement.Resources.psd1\nPackageProviderFunctions.psm1\nPSGetModuleInfo.xml\n\n.local/share/powershell/Modules/PackageManagement/1.4.8.1/coreclr/:\n\n.local/share/powershell/Modules/PackageManagement/1.4.8.1/coreclr/netstandard2.0/: (COLLAPSED)\n\n.local/share/powershell/Modules/PackageManagement/1.4.8.1/DSCResources/:\nPackageManagementDscUtilities.psm1\nPackageManagementDscUtilities.strings.psd1\n\n.local/share/powershell/Modules/PackageManagement/1.4.8.1/DSCResources/MSFT_PackageManagement/: (COLLAPSED)\n\n.local/share/powershell/Modules/PackageManagement/1.4.8.1/DSCResources/MSFT_PackageManagementSource/: (COLLAPSED)\n\n.local/share/powershell/Modules/PackageManagement/1.4.8.1/fullclr/:\nMicrosoft.PackageManagement.ArchiverProviders.dll\nMicrosoft.PackageManagement.CoreProviders.dll\nMicrosoft.PackageManagement.dll\nMicrosoft.PackageManagement.MetaProvider.PowerShell.dll\nMicrosoft.PackageManagement.MsiProvider.dll\nMicrosoft.PackageManagement.MsuProvider.dll\nMicrosoft.PackageManagement.NuGetProvider.dll\nMicrosoft.PowerShell.PackageManagement.dll\n\n.local/share/powershell/Modules/PowerShellGet/:\n\n.local/share/powershell/Modules/PowerShellGet/2.2.5/:\nPowerShellGet.psd1\nPSGet.Format.ps1xml\nPSGet.Resource.psd1\nPSGetModuleInfo.xml\nPSModule.psm1\n\n.local/share/powershell/Modules/PowerShellGet/2.2.5/DscResources/:\n\n.local/share/powershell/Modules/PowerShellGet/2.2.5/DscResources/MSFT_PSModule/: (COLLAPSED)\n\n.local/share/powershell/Modules/PowerShellGet/2.2.5/DscResources/MSFT_PSRepository/: (COLLAPSED)\n\n.local/share/powershell/Modules/PowerShellGet/2.2.5/en-US/:\nPSGet.Resource.psd1\n\n.local/share/powershell/Modules/PowerShellGet/2.2.5/Modules/:\n\n.local/share/powershell/Modules/PowerShellGet/2.2.5/Modules/PowerShellGet.LocalizationHelper/: (COLLAPSED)\n\n.local/share/powershell/Modules/PowerShellGet/2.2.5/Modules/PowerShellGet.ResourceHelper/: (COLLAPSED)\n\n.local/share/powershell/Scripts/:\n\n.local/share/powershell/Scripts/InstalledScriptInfos/: (COLLAPSED)\n\n.local/share/xrdp/:\nxrdp-chansrv.10.log\n\n.minikube/:\n\n.minikube/addons/: (COLLAPSED)\n\n.minikube/cache/: (COLLAPSED)\n\n.minikube/certs/: (COLLAPSED)\n\n.minikube/config/: (COLLAPSED)\n\n.minikube/files/: (COLLAPSED)\n\n.minikube/machines/: (COLLAPSED)\n\nMusic/: (COLLAPSED)\n\n.nemo/: (COLLAPSED)\n\n.net/:\n\n.net/bicep/:\n\n.net/bicep/Ub4SlhNjFY-d/:\nlibSystem.IO.Ports.Native.so\n\n.npm/:\n_update-notifier-last-checked\n\n.npm/_logs/:\n2026-03-23T21_38_52_156Z-debug-0.log\n2026-03-23T21_39_28_938Z-debug-0.log\n2026-03-23T21_39_34_218Z-debug-0.log\n2026-03-23T21_58_25_194Z-debug-0.log\n\n.nuget/:\n\n.nuget/NuGet/:\nNuGet.Config\n\n.pcsc10/:\npcscd.comm\n\nPictures/: (COLLAPSED)\n\nPublic/: (COLLAPSED)\n\n.rovodev/:\nconfig.yml\nconfig.yml.lock\n.nc\nprompt_history\n\n.rovodev/sessions/: (COLLAPSED)\n\n.rovodev/subagents/:\nbetter-review.md\n\nsnap/:\n\nsnap/firefox/:\n\nsnap/firefox/8054/: (COLLAPSED)\n\nsnap/firefox/common/: (COLLAPSED)\n\nsnap/firefox/current/: (COLLAPSED)\n\nsnap/mesa-2404/:\n\nsnap/mesa-2404/1165/: (COLLAPSED)\n\nsnap/mesa-2404/common/: (COLLAPSED)\n\nsnap/mesa-2404/current/: (COLLAPSED)\n\n.ssh/:\nauthorized_keys\n\nTemplates/: (COLLAPSED)\n\nthinclient_drives/:\n\nthinclient_drives/.clipboard/: (COLLAPSED)\n\n.vcpkg/:\nconfig\n\nVideos/: (COLLAPSED)\n</workspace>",
+                    "timestamp": "2026-03-31T08:21:54.317451Z",
+                    "dynamic_ref": null,
+                    "part_kind": "system-prompt"
+                },
+                {
+                    "content": "",
+                    "timestamp": "2026-03-31T08:22:36.862300Z",
+                    "dynamic_ref": "planning_prompt",
+                    "part_kind": "system-prompt"
+                },
+                {
+                    "content": "\n## Proactivity and Permission Guidelines for Jira, Confluence, and SCM Integrations\n\n**When to execute immediately (no user confirmation needed):**\n- If the user's message explicitly requests an action (e.g., \"create a ticket for X\", \"add a comment to PROJ-123\", \"create a page containing foo\")\n- Any read operations that you want to perform (e.g., getting details of a Jira ticket, fetching content from Confluence, listing open PRs in a repo)\nIn cases like these, you can perform actions immediately. You may read Jira, Confluence, and SCM data freely.\n\n**When to confirm with the user first:**\n- Whenever you want to perform a write action that the user has not explicitly requested (e.g., creating a Jira ticket, commenting on a ticket, creating a Confluence page)\n- When creating a Confluence page, unless the user gives you a specific location, verify with the user where they want the page created\n- Before performing ANY git write operations (e.g., committing, pushing, merging, stashing, etc) unless directly requested by the user\n\n## Proactive Integration Suggestions\n\nAfter completing significant work, proactively suggest relevant next steps to help users track and document their progress.\n\n**CRITICAL: Only suggest actions that are actually supported by the currently available tools.**\n- Before offering an action, verify you have the necessary tool available.\n- If the tool is not available, do NOT offer that option.\n\n**When you detect or discuss TODOs in code:**\n- If Jira tools are available, suggest creating Jira work items to track them.\n- Example: \"I noticed some TODOs in the code. Would you like me to create Jira work items to track these tasks?\"\n\n**After completing code analysis, reviews, or investigations:**\n- Suggest documenting findings in Confluence.\n- Example: \"Would you like me to create a Confluence page to document this analysis?\"\n\n**After making code changes, fixes, or implementations:**\n- If SCM/PR tools are available, suggest creating a branch or pull request.\n- Example: \"Would you like me to help create a pull request for these changes?\"\n\n**Follow this interaction pattern:**\n1. Present options based on what you can actually do with the available tools.\n2. Make intelligent guesses about context using available project information.\n3. Confirm before executing actions that require user approval.\n4. Use available MCP tools to execute the chosen action.\n5. Provide links to created/updated resources.\n\nOnly suggest these when the work feels substantial and worth tracking - not for minor edits or exploratory tasks.",
+                    "timestamp": "2026-03-31T08:21:54.317905Z",
+                    "dynamic_ref": null,
+                    "part_kind": "system-prompt"
+                },
+                {
+                    "content": "",
+                    "timestamp": "2026-03-31T08:22:36.862859Z",
+                    "dynamic_ref": "memory_prompt",
+                    "part_kind": "system-prompt"
+                },
+                {
+                    "content": "\n## Using Your update_todo Tool\n\nYou have access to the update_todo tool to help you plan tasks and report progress. Use this tool frequently for complex tasks to ensure that you are tracking your tasks and giving the user visibility into your progress. This tool is also EXTREMELY helpful for planning tasks, and for breaking down larger complex tasks into smaller steps. If you do not use this tool when planning, you may forget to do important tasks - and that is unacceptable.\n\nInstructions for using the update_todo tool:\n- It is critical that you mark todos as completed as soon as you are done with a task. Do not batch up multiple tasks before marking them as completed.\n- When initially creating a todo list for a task, you should mark the first item you will work on as in progress - do not make another call to the tool to mark an item as in progress just after creating the list.\n- Never end an interaction with a call to update_todo - you can just finish up and the todo list will be considered complete.\n- Do not make single-step plans.\n- Never call update_todo on its own - always parallelize with other tool calls when possible.",
+                    "timestamp": "2026-03-31T08:22:36.863011Z",
+                    "dynamic_ref": "TodoListReminderCallback.todolist_system_prompt",
+                    "part_kind": "system-prompt"
+                },
+                {
+                    "content": "\n## Available Skills\n\nThe following skills can be loaded using the get_skill tool:\n<available_skills>\n  <skill>\n    <name>research</name>\n    <description>Conducts deep, thorough research on a specific query by breaking it down into distinct domains\nand delegating research to specialized subagents. Results are synthesized into a cohesive,\ntheme-organized markdown report saved in the research-reports directory.\n</description>\n    <to_load>get_skill(skill_name_or_path=\"research\")</to_load>\n  </skill>\n  <skill>\n    <name>confluence</name>\n    <description>Instructions for working with Confluence pages, spaces, and content using the Atlassian MCP tools.\nUse when you need to read, create, update, or search Confluence pages, navigate page hierarchies, or add comments.\n</description>\n    <to_load>get_skill(skill_name_or_path=\"confluence\")</to_load>\n  </skill>\n</available_skills>",
+                    "timestamp": "2026-03-31T08:22:36.863146Z",
+                    "dynamic_ref": "AgentDefinition.skill_prompt",
+                    "part_kind": "system-prompt"
+                },
+                {
+                    "content": "\n## Available MCP Toolsets\n\nThe following MCP toolsets are available via compressed tool interfaces. Each toolset exposes a number of subtools via\n`mcp__<name>__get_tool_schema` and `mcp__<name>__invoke_tool`, which you can use to discover and call the tools within that toolset.\n<available_mcp_toolsets>\n  <mcp_toolset>\n    <name>mcp__atlassian_</name>\n    <tool_count>16</tool_count>\n  </mcp_toolset>\n</available_mcp_toolsets>",
+                    "timestamp": "2026-03-31T08:22:36.863383Z",
+                    "dynamic_ref": "AgentDefinition.compressed_mcp_servers_prompt",
+                    "part_kind": "system-prompt"
+                },
+                {
+                    "content": "",
+                    "timestamp": "2026-03-31T08:22:36.863540Z",
+                    "dynamic_ref": "RovoDevAgentMixin._add_system_prompts.<locals>.<lambda>",
+                    "part_kind": "system-prompt"
+                },
+                {
+                    "content": "\nThe user's Atlassian Account ID (AAID) is 712020:53d15810-14f3-4896-83a9-0a6a9f8e0062.",
+                    "timestamp": "2026-03-31T08:21:54.319199Z",
+                    "dynamic_ref": null,
+                    "part_kind": "system-prompt"
+                },
+                {
+                    "content": "<system-reminder>\nCurrent time: Tuesday, 2026-03-31 08:21:54\n</system-reminder>",
+                    "timestamp": "2026-03-31T08:21:54.387005Z",
+                    "part_kind": "user-prompt"
+                },
+                {
+                    "content": "how to use skills in rovodev",
+                    "timestamp": "2026-03-31T08:21:54.319206Z",
+                    "part_kind": "user-prompt"
+                },
+                {
+                    "content": "\n\nYou have used 0 iterations.",
+                    "timestamp": "2026-03-31T08:21:54.323179Z",
+                    "part_kind": "user-prompt"
+                }
+            ],
+            "timestamp": "2026-03-31T08:21:54.387341Z",
+            "instructions": null,
+            "kind": "request",
+            "run_id": "c1f13e22-5738-4d12-901f-a1ef55eaaad1",
+            "metadata": null
+        },
+        {
+            "parts": [
+                {
+                    "content": "I can explain how to use skills in Rovo Dev!\n\n## Skills in Rovo Dev\n\n**Skills** are reusable instruction sets that give Rovo Dev specialized capabilities for specific types of tasks. They provide detailed instructions and relevant tool schemas to help complete tasks more effectively.\n\n### Available Skills\n\nYou currently have **2 skills** available:\n\n| Skill | Description |\n|-------|-------------|\n| `research` | Conducts deep, thorough research by breaking queries into domains and delegating to specialized subagents. Results are saved as a markdown report. |\n| `confluence` | Instructions for working with Confluence pages — reading, creating, updating, searching, navigating page hierarchies, and adding comments. |\n\n---\n\n### How to Use Skills\n\nSimply **ask me to perform a task** that relates to a skill, and I'll automatically load and apply the relevant skill. You can also explicitly request one:\n\n#### Examples:\n\n**Research skill:**\n> *\"Research the latest trends in microservices architecture\"*\n> *\"Do a deep dive on Kubernetes vs Docker Swarm\"*\n\n**Confluence skill:**\n> *\"Create a Confluence page summarizing our API design\"*\n> *\"Find and update the onboarding page in our Confluence space\"*\n> *\"Search Confluence for pages about our deployment process\"*\n\n---\n\n### Behind the Scenes\n\nWhen I use a skill, I:\n1. **Load the skill** to get specialized instructions\n2. **Follow those instructions** to complete your task effectively\n3. For the **research skill**, I break the topic into domains and use multiple specialized subagents in parallel, then synthesize the results into a markdown report\n4. For the **confluence skill**, I use the Atlassian MCP tools to interact with your Confluence workspace\n\n---\n\nWhat would you like to do? I can:\n- 🔍 **Research** a topic for you\n- 📄 **Work with Confluence** pages (create, update, search, or read)\n- 💡 Or just help you with any development task!",
+                    "id": null,
+                    "provider_name": null,
+                    "provider_details": null,
+                    "part_kind": "text"
+                }
+            ],
+            "usage": {
+                "input_tokens": 17669,
+                "cache_write_tokens": 15568,
+                "cache_read_tokens": 2098,
+                "output_tokens": 468,
+                "input_audio_tokens": 0,
+                "cache_audio_read_tokens": 0,
+                "output_audio_tokens": 0,
+                "details": {
+                    "cache_creation_input_tokens": 15568,
+                    "cache_read_input_tokens": 2098,
+                    "input_tokens": 3,
+                    "output_tokens": 468
+                }
+            },
+            "model_name": "claude-sonnet-4-6",
+            "timestamp": "2026-03-31T08:21:56.466852Z",
+            "kind": "response",
+            "provider_name": "anthropic",
+            "provider_url": "https://api.atlassian.com/rovodev/v2/proxy/ai/v1/google/v1/",
+            "provider_details": {
+                "finish_reason": "end_turn"
+            },
+            "provider_response_id": "msg_vrtx_019ttH9shr3jdwpwapSKGjLx",
+            "finish_reason": "stop",
+            "run_id": "c1f13e22-5738-4d12-901f-a1ef55eaaad1",
+            "metadata": null
+        },
+        {
+            "parts": [
+                {
+                    "content": "<system-reminder>\nCurrent time: Tuesday, 2026-03-31 08:22:37\n</system-reminder>",
+                    "timestamp": "2026-03-31T08:22:37.136585Z",
+                    "part_kind": "user-prompt"
+                },
+                {
+                    "content": "create a new skill",
+                    "timestamp": "2026-03-31T08:22:36.863551Z",
+                    "part_kind": "user-prompt"
+                },
+                {
+                    "content": "\n\nYou have used 0 iterations.",
+                    "timestamp": "2026-03-31T08:22:36.866239Z",
+                    "part_kind": "user-prompt"
+                }
+            ],
+            "timestamp": "2026-03-31T08:22:37.136911Z",
+            "instructions": null,
+            "kind": "request",
+            "run_id": "039bcc9a-c7cf-47d9-baea-13192dcc1f91",
+            "metadata": null
+        },
+        {
+            "parts": [
+                {
+                    "content": "I'd love to help you create a new skill! Let me ask a few questions to understand what you need.",
+                    "id": null,
+                    "provider_name": null,
+                    "provider_details": null,
+                    "part_kind": "text"
+                },
+                {
+                    "tool_name": "ask_user_questions",
+                    "args": "{\"questions\": [{\"header\":\"Skill Purpose\",\"question\":\"What should the new skill help Rovo Dev do?\",\"options\":[{\"label\":\"Code Review\",\"description\":\"A skill for performing thorough code reviews with specific guidelines and checklists\"},{\"label\":\"Documentation\",\"description\":\"A skill for generating or updating code documentation (README, API docs, etc.)\"},{\"label\":\"Testing\",\"description\":\"A skill for writing and organizing tests (unit, integration, e2e)\"},{\"label\":\"Custom\",\"description\":\"Something else — I'll describe it myself\"}]},{\"header\":\"Skill Scope\",\"question\":\"How specialized should this skill be?\",\"options\":[{\"label\":\"General Purpose\",\"description\":\"Applicable across many projects and languages\"},{\"label\":\"Project Specific\",\"description\":\"Tailored to this specific workspace or tech stack\"}]}]}",
+                    "tool_call_id": "toolu_vrtx_01FSYpd6mWrLFeGFPVdfNfFL",
+                    "id": null,
+                    "provider_name": null,
+                    "provider_details": null,
+                    "part_kind": "tool-call"
+                }
+            ],
+            "usage": {
+                "input_tokens": 18187,
+                "cache_write_tokens": 11596,
+                "cache_read_tokens": 6588,
+                "output_tokens": 319,
+                "input_audio_tokens": 0,
+                "cache_audio_read_tokens": 0,
+                "output_audio_tokens": 0,
+                "details": {
+                    "cache_creation_input_tokens": 11596,
+                    "cache_read_input_tokens": 6588,
+                    "input_tokens": 3,
+                    "output_tokens": 319
+                }
+            },
+            "model_name": "claude-sonnet-4-6",
+            "timestamp": "2026-03-31T08:22:41.071044Z",
+            "kind": "response",
+            "provider_name": "anthropic",
+            "provider_url": "https://api.atlassian.com/rovodev/v2/proxy/ai/v1/google/v1/",
+            "provider_details": {
+                "finish_reason": "tool_use"
+            },
+            "provider_response_id": "msg_vrtx_01UQpeNPEpFQqkgULVLwD96e",
+            "finish_reason": "tool_call",
+            "run_id": "039bcc9a-c7cf-47d9-baea-13192dcc1f91",
+            "metadata": null
+        },
+        {
+            "parts": [
+                {
+                    "tool_name": "ask_user_questions",
+                    "content": {
+                        "What should the new skill help Rovo Dev do?": [
+                            "Custom"
+                        ],
+                        "How specialized should this skill be?": [
+                            "General Purpose"
+                        ]
+                    },
+                    "tool_call_id": "toolu_vrtx_01FSYpd6mWrLFeGFPVdfNfFL",
+                    "metadata": null,
+                    "timestamp": "2026-03-31T08:23:11.772194Z",
+                    "part_kind": "tool-return"
+                },
+                {
+                    "content": "\n\nYou have used 0 iterations.",
+                    "timestamp": "2026-03-31T08:23:11.784917Z",
+                    "part_kind": "user-prompt"
+                },
+                {
+                    "content": "<system-reminder>\nCurrent time: Tuesday, 2026-03-31 08:23:11\n</system-reminder>",
+                    "timestamp": "2026-03-31T08:23:11.785214Z",
+                    "part_kind": "user-prompt"
+                }
+            ],
+            "timestamp": "2026-03-31T08:23:11.785395Z",
+            "instructions": null,
+            "kind": "request",
+            "run_id": "29e68fa6-2ea4-4e92-a923-cfe58b0103b0",
+            "metadata": null
+        },
+        {
+            "parts": [
+                {
+                    "content": "Could you describe what you'd like the new skill to do? For example:\n\n- **What task or workflow** should it help with?\n- **What steps or guidelines** should it follow?\n- **Any specific tools or outputs** it should use/produce?\n\nThe more detail you give me, the better I can craft the skill for you! 😊",
+                    "id": null,
+                    "provider_name": null,
+                    "provider_details": null,
+                    "part_kind": "text"
+                }
+            ],
+            "usage": {
+                "input_tokens": 18559,
+                "cache_write_tokens": 16458,
+                "cache_read_tokens": 2098,
+                "output_tokens": 80,
+                "input_audio_tokens": 0,
+                "cache_audio_read_tokens": 0,
+                "output_audio_tokens": 0,
+                "details": {
+                    "cache_creation_input_tokens": 16458,
+                    "cache_read_input_tokens": 2098,
+                    "input_tokens": 3,
+                    "output_tokens": 80
+                }
+            },
+            "model_name": "claude-sonnet-4-6",
+            "timestamp": "2026-03-31T08:23:14.028195Z",
+            "kind": "response",
+            "provider_name": "anthropic",
+            "provider_url": "https://api.atlassian.com/rovodev/v2/proxy/ai/v1/google/v1/",
+            "provider_details": {
+                "finish_reason": "end_turn"
+            },
+            "provider_response_id": "msg_vrtx_01Si4W8XJRAFSMpDwYzU3g2G",
+            "finish_reason": "stop",
+            "run_id": "29e68fa6-2ea4-4e92-a923-cfe58b0103b0",
+            "metadata": null
+        }
+    ],
+    "deferred_results": null,
+    "usage": {
+        "input_tokens": 54415,
+        "cache_write_tokens": 43622,
+        "cache_read_tokens": 10784,
+        "output_tokens": 867,
+        "input_audio_tokens": 0,
+        "cache_audio_read_tokens": 0,
+        "output_audio_tokens": 0,
+        "details": {
+            "cache_creation_input_tokens": 43622,
+            "cache_read_input_tokens": 10784,
+            "input_tokens": 9,
+            "output_tokens": 867
+        },
+        "requests": 3,
+        "tool_calls": 0
+    },
+    "timestamp": 1774945082,
+    "initial_prompt": "how to use skills in rovodev",
+    "prompts": [
+        "how to use skills in rovodev",
+        "create a new skill"
+    ],
+    "latest_result": "Could you describe what you'd like the new skill to do? For example:\n\n- **What task or workflow** should it help with?\n- **What steps or guidelines** should it follow?\n- **Any specific tools or outputs** it should use/produce?\n\nThe more detail you give me, the better I can craft the skill for you! 😊",
+    "workspace_path": "/root",
+    "base_log_dir": "/root/.rovodev/sessions",
+    "is_subagent": false,
+    "subagent_tool_call_id": null
+}

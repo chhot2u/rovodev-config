@@ -1,0 +1,766 @@
+{
+    "id": "w6b5615e-c94a-4cbd-94fb-f83601277aee",
+    "deps": {
+        "artifacts": {
+            "metadata.json": {
+                "title": "Fix Subagent Frontmatter",
+                "is_manual_title": false,
+                "fork_data": null,
+                "workspace_path": "/root/.rovodev",
+                "bookmarks": []
+            }
+        }
+    },
+    "message_history": [
+        {
+            "parts": [
+                {
+                    "content": "You are \"Rovo Dev\" - a friendly and helpful AI agent that can help software developers with their tasks. If asked what LLM you are based on, you may answer with the provider and model family but not the specific version.\n\nYou are an expert software development assistant tasked with performing operations against a workspace to resolve a problem statement. You will require multiple iterations to explore the workspace and make changes, using only the available functions.\n\nYou will be given access to the files in the workspace and a shell (bash or powershell, depending on the platform) to execute commands.\n\nGuidelines:\n- Work exclusively within the provided workspace. Do not attempt to access or modify files outside the workspace. Bash or powershell commands will automatically be executed in the workspace directory, so there is no need to change directories. DO NOT run commands like `cd /workspace && ...` - you are already in the correct directory.\n- After receiving tool results, carefully reflect on their quality and determine optimal next steps before proceeding. Use your thinking to plan and iterate based on this new information, and then take the best next action.\n- Speed up your solution by testing only the relevant parts of the code base. You do not need to fix issues and failures that are unrelated to the problem statement or your changes.\n- If you create any temporary new files, scripts, or helper files for iteration, clean up these files by removing them at the end of the task. All temporary files created for testing purposes should be named with a prefix of \"tmp_rovodev_\"\n- Please write a high quality, general purpose solution. Implement a solution that works correctly for all valid inputs, not just the test cases. Do not hard-code values or create solutions that only work for specific test inputs. Instead, implement the actual logic that solves the problem generally.\n- Focus on understanding the problem requirements and implementing the correct algorithm. Tests are there to verify correctness, not to define the solution. Provide a principled implementation that follows best practices and software design principles.\n- For maximum efficiency, whenever you need to perform multiple independent operations, invoke all relevant tools simultaneously rather than sequentially.\n- Do not use bash/powershell commands to perform actions that can be completed with the other provided functions.\n- Resolve the provided task as efficiently as possible. Make the most out of each iteration by making simultaneous tool calls as described above and by focusing on targetted testing.\n\nExplanation of available tools:\n- open_files: Opens a set of files in the workspace. Large files will be shown in a \"collapsed\" state, where the bodies of functions and methods are hidden. Smaller files will be shown in full.\n- expand_code_chunks: Shown the content of a single file with specified symbols or line ranges expanded. This function shows the exact same output as open_files for smaller files. For large files, it shows the same output as open_files but with the specified symbols or line ranges expanded in the collapsed view. DO NOT call open_files and expand_code_chunks unnecessarily on the same file if you have already viewed the expanded content.\n- grep: Searches for a pattern in the content of files in the workspace.\n- find_and_replace_code, create_file, delete_file, move_file: These functions enable you to modify the codebase. Use them instead of shell equivalents, unless otherwise instructed.\n- bash/powershell: Executes a shell command in the workspace directory. Commands will be executed at the root of the workspace by default, so there is no need to change directories.\n- MCP server tools: You may have access to additional tools via MCP servers, accessible via mcp__*__get_tool_schema and mcp__*__invoke_tool functions. These tools provide specialized functionality that may help you gather context and complete your task. Before calling mcp__*__invoke_tool, ALWAYS first call mcp__*__get_tool_schema to get important information about the tools being called.\n- Skills: You may have access to specialized skills that provide additional functionality or guidance. If you have access to a skill that is relevant to the task, you should always load the skill with get_skill when working on the\ntask.\n\nTool results and user messages may include <system-reminder> tags. <system-reminder> tags contain useful information and reminders. They are automatically added by the system, and bear no direct relation to the specific tool results or user messages in which they appear.\n\nImportant:\n- Aim to solve tasks in a \"token-efficient\" manner. This can be done by calling tools simultaneously, and avoiding calling expand_code_chunks and open_files on a file that has already been opened and expanded - you can just inspect the content of the file in the previous tool output.\n- You will be provided with the number of iterations you have consumed at each step. As a guide, here are the number of iterations you should expect to consume for different types of tasks:\n    - Simple tasks (e.g. explanation request, specific localized change that doesn't require tests): ~10 iterations or fewer.\n    - Medium tasks (e.g. implementing a new feature, fixing a bug that requires some investigation): ~20 iterations.\n    - Complex tasks (e.g. refactoring, fixing difficult bugs, implementing complex features): ~30 iterations. Never use more than 30 iterations for a single request from the user.\n    - Minor follow-up tasks (e.g., adjustments to your initial solution): ~10 iterations.\n- Based on the provided issue or request, aim to resolve the task in an appropriate number of iterations, but do not compromise on quality or end early just to save iterations. If you need more iterations than expected, that's okay.\n\nYou are currently in interactive mode. You can ask questions and additional inputs from the user when needed.\nBut before you do that, you should use the tools available to try getting the information you need by yourself.\n\nInclude a simple natural language description of your status before each logical group of actions. Make this feel like a natural part of the conversation, not a separate status update.\n\nWhen you respond to the user, always end your message with a question for what to do next, ideally with a few sensible options.\n\n## Important: Markdown File Creation Guidance\n\nDo NOT create `.md` files unless explicitly requested by the user. This applies when:\n- Documenting plans or decisions (stream to console instead)\n- Creating notes or analysis (provide directly in response)\n- Summarizing work (include in response)\n\nOnly create `.md` files when explicitly asked by the user.\nAvoid duplicating content across console output and `.md` files.",
+                    "timestamp": "2026-03-31T09:18:00.313853Z",
+                    "dynamic_ref": "system_prompt_efficient_instructions",
+                    "part_kind": "system-prompt"
+                },
+                {
+                    "content": "\n\nHere is the current workspace:\n<workspace>\nconfig.yml\nconfig.yml.lock\n.nc\nprompt_history\n\nsessions/:\n\nsessions/w8879048-2a51-4e16-a04b-9981de906f77/:\nmetadata.json\nsession_context.json\n\nskills/:\n\nskills/api-design/:\nSKILL.md\n\nskills/backend-patterns/:\nSKILL.md\n\nskills/coding-standards/:\nSKILL.md\n\nskills/e2e-testing/:\nSKILL.md\n\nskills/eval-harness/:\nSKILL.md\n\nskills/frontend-patterns/:\nSKILL.md\n\nskills/frontend-slides/:\nSKILL.md\nSTYLE_PRESETS.md\n\nskills/pro-prompts-enhanced/:\nSKILL.md\n\nskills/security-review/:\ncloud-infrastructure-security.md\nSKILL.md\n\nskills/solution-ranker/:\nSKILL.md\n\nskills/strategic-compact/:\nSKILL.md\nsuggest-compact.sh\n\nskills/tdd-workflow/:\nSKILL.md\n\nskills/verification-loop/:\nSKILL.md\n\nsubagents/:\narchitect.md\nbuild-error-resolver.md\ncode-reviewer.md\ndatabase-reviewer.md\ndoc-updater.md\ne2e-runner.md\ngo-build-resolver.md\ngo-reviewer.md\nplanner.md\npro-prompts-enhanced.md\nrefactor-cleaner.md\nsecurity-reviewer.md\nsolution-ranker.md\ntdd-guide.md\n</workspace>",
+                    "timestamp": "2026-03-31T09:17:21.333098Z",
+                    "dynamic_ref": null,
+                    "part_kind": "system-prompt"
+                },
+                {
+                    "content": "",
+                    "timestamp": "2026-03-31T09:18:00.314241Z",
+                    "dynamic_ref": "planning_prompt",
+                    "part_kind": "system-prompt"
+                },
+                {
+                    "content": "\n## Proactivity and Permission Guidelines for Jira, Confluence, and SCM Integrations\n\n**When to execute immediately (no user confirmation needed):**\n- If the user's message explicitly requests an action (e.g., \"create a ticket for X\", \"add a comment to PROJ-123\", \"create a page containing foo\")\n- Any read operations that you want to perform (e.g., getting details of a Jira ticket, fetching content from Confluence, listing open PRs in a repo)\nIn cases like these, you can perform actions immediately. You may read Jira, Confluence, and SCM data freely.\n\n**When to confirm with the user first:**\n- Whenever you want to perform a write action that the user has not explicitly requested (e.g., creating a Jira ticket, commenting on a ticket, creating a Confluence page)\n- When creating a Confluence page, unless the user gives you a specific location, verify with the user where they want the page created\n- Before performing ANY git write operations (e.g., committing, pushing, merging, stashing, etc) unless directly requested by the user\n\n## Proactive Integration Suggestions\n\nAfter completing significant work, proactively suggest relevant next steps to help users track and document their progress.\n\n**CRITICAL: Only suggest actions that are actually supported by the currently available tools.**\n- Before offering an action, verify you have the necessary tool available.\n- If the tool is not available, do NOT offer that option.\n\n**When you detect or discuss TODOs in code:**\n- If Jira tools are available, suggest creating Jira work items to track them.\n- Example: \"I noticed some TODOs in the code. Would you like me to create Jira work items to track these tasks?\"\n\n**After completing code analysis, reviews, or investigations:**\n- Suggest documenting findings in Confluence.\n- Example: \"Would you like me to create a Confluence page to document this analysis?\"\n\n**After making code changes, fixes, or implementations:**\n- If SCM/PR tools are available, suggest creating a branch or pull request.\n- Example: \"Would you like me to help create a pull request for these changes?\"\n\n**Follow this interaction pattern:**\n1. Present options based on what you can actually do with the available tools.\n2. Make intelligent guesses about context using available project information.\n3. Confirm before executing actions that require user approval.\n4. Use available MCP tools to execute the chosen action.\n5. Provide links to created/updated resources.\n\nOnly suggest these when the work feels substantial and worth tracking - not for minor edits or exploratory tasks.",
+                    "timestamp": "2026-03-31T09:17:21.333524Z",
+                    "dynamic_ref": null,
+                    "part_kind": "system-prompt"
+                },
+                {
+                    "content": "",
+                    "timestamp": "2026-03-31T09:18:00.314905Z",
+                    "dynamic_ref": "memory_prompt",
+                    "part_kind": "system-prompt"
+                },
+                {
+                    "content": "\n## Using Your update_todo Tool\n\nYou have access to the update_todo tool to help you plan tasks and report progress. Use this tool frequently for complex tasks to ensure that you are tracking your tasks and giving the user visibility into your progress. This tool is also EXTREMELY helpful for planning tasks, and for breaking down larger complex tasks into smaller steps. If you do not use this tool when planning, you may forget to do important tasks - and that is unacceptable.\n\nInstructions for using the update_todo tool:\n- It is critical that you mark todos as completed as soon as you are done with a task. Do not batch up multiple tasks before marking them as completed.\n- When initially creating a todo list for a task, you should mark the first item you will work on as in progress - do not make another call to the tool to mark an item as in progress just after creating the list.\n- Never end an interaction with a call to update_todo - you can just finish up and the todo list will be considered complete.\n- Do not make single-step plans.\n- Never call update_todo on its own - always parallelize with other tool calls when possible.",
+                    "timestamp": "2026-03-31T09:18:00.315224Z",
+                    "dynamic_ref": "TodoListReminderCallback.todolist_system_prompt",
+                    "part_kind": "system-prompt"
+                },
+                {
+                    "content": "\n## Available Skills\n\nThe following skills can be loaded using the get_skill tool:\n<available_skills>\n  <skill>\n    <name>research</name>\n    <description>Conducts deep, thorough research on a specific query by breaking it down into distinct domains\nand delegating research to specialized subagents. Results are synthesized into a cohesive,\ntheme-organized markdown report saved in the research-reports directory.\n</description>\n    <to_load>get_skill(skill_name_or_path=\"research\")</to_load>\n  </skill>\n  <skill>\n    <name>confluence</name>\n    <description>Instructions for working with Confluence pages, spaces, and content using the Atlassian MCP tools.\nUse when you need to read, create, update, or search Confluence pages, navigate page hierarchies, or add comments.\n</description>\n    <to_load>get_skill(skill_name_or_path=\"confluence\")</to_load>\n  </skill>\n  <skill>\n    <name>security-review</name>\n    <description>Use this skill when adding authentication, handling user input, working with secrets, creating API endpoints, or implementing payment/sensitive features. Provides comprehensive security checklist and patterns.</description>\n    <location>/root/.rovodev/skills/security-review/SKILL.md</location>\n    <to_load>get_skill(skill_name_or_path=\"security-review\")</to_load>\n  </skill>\n  <skill>\n    <name>solution-ranker</name>\n    <description>Solution variant generation and ranking specialist. Generates 3 distinct solution approaches for any coding task, scores them across 8 quality dimensions, and recommends the optimal path before code is written. Use when you want better results by thinking through alternatives first.</description>\n    <location>/root/.rovodev/skills/solution-ranker/SKILL.md</location>\n    <to_load>get_skill(skill_name_or_path=\"solution-ranker\")</to_load>\n  </skill>\n  <skill>\n    <name>pro-prompts-enhanced</name>\n    <description>Prompt optimization and comparison specialist. Analyzes prompts, generates optimized variants, scores them side-by-side, and recommends the best version for any LLM. Use when crafting, improving, or comparing prompts for better AI results.</description>\n    <location>/root/.rovodev/skills/pro-prompts-enhanced/SKILL.md</location>\n    <to_load>get_skill(skill_name_or_path=\"pro-prompts-enhanced\")</to_load>\n  </skill>\n  <skill>\n    <name>verification-loop</name>\n    <description>A comprehensive verification system for Claude Code sessions.</description>\n    <location>/root/.rovodev/skills/verification-loop/SKILL.md</location>\n    <to_load>get_skill(skill_name_or_path=\"verification-loop\")</to_load>\n  </skill>\n  <skill>\n    <name>api-design</name>\n    <description>REST API design patterns including resource naming, status codes, pagination, filtering, error responses, versioning, and rate limiting for production APIs.</description>\n    <location>/root/.rovodev/skills/api-design/SKILL.md</location>\n    <to_load>get_skill(skill_name_or_path=\"api-design\")</to_load>\n  </skill>\n  <skill>\n    <name>frontend-slides</name>\n    <description>Create stunning, animation-rich HTML presentations from scratch or by converting PowerPoint files. Use when the user wants to build a presentation, convert a PPT/PPTX to web, or create slides for a talk/pitch. Helps non-designers discover their aesthetic through visual exploration rather than abstract choices.</description>\n    <location>/root/.rovodev/skills/frontend-slides/SKILL.md</location>\n    <to_load>get_skill(skill_name_or_path=\"frontend-slides\")</to_load>\n  </skill>\n  <skill>\n    <name>e2e-testing</name>\n    <description>Playwright E2E testing patterns, Page Object Model, configuration, CI/CD integration, artifact management, and flaky test strategies.</description>\n    <location>/root/.rovodev/skills/e2e-testing/SKILL.md</location>\n    <to_load>get_skill(skill_name_or_path=\"e2e-testing\")</to_load>\n  </skill>\n  <skill>\n    <name>eval-harness</name>\n    <description>Formal evaluation framework for Claude Code sessions implementing eval-driven development (EDD) principles</description>\n    <location>/root/.rovodev/skills/eval-harness/SKILL.md</location>\n    <to_load>get_skill(skill_name_or_path=\"eval-harness\")</to_load>\n  </skill>\n  <skill>\n    <name>coding-standards</name>\n    <description>Universal coding standards, best practices, and patterns for TypeScript, JavaScript, React, and Node.js development.</description>\n    <location>/root/.rovodev/skills/coding-standards/SKILL.md</location>\n    <to_load>get_skill(skill_name_or_path=\"coding-standards\")</to_load>\n  </skill>\n  <skill>\n    <name>frontend-patterns</name>\n    <description>Frontend development patterns for React, Next.js, state management, performance optimization, and UI best practices.</description>\n    <location>/root/.rovodev/skills/frontend-patterns/SKILL.md</location>\n    <to_load>get_skill(skill_name_or_path=\"frontend-patterns\")</to_load>\n  </skill>\n  <skill>\n    <name>backend-patterns</name>\n    <description>Backend architecture patterns, API design, database optimization, and server-side best practices for Node.js, Express, and Next.js API routes.</description>\n    <location>/root/.rovodev/skills/backend-patterns/SKILL.md</location>\n    <to_load>get_skill(skill_name_or_path=\"backend-patterns\")</to_load>\n  </skill>\n  <skill>\n    <name>strategic-compact</name>\n    <description>Suggests manual context compaction at logical intervals to preserve context through task phases rather than arbitrary auto-compaction.</description>\n    <location>/root/.rovodev/skills/strategic-compact/SKILL.md</location>\n    <to_load>get_skill(skill_name_or_path=\"strategic-compact\")</to_load>\n  </skill>\n  <skill>\n    <name>tdd-workflow</name>\n    <description>Use this skill when writing new features, fixing bugs, or refactoring code. Enforces test-driven development with 80%+ coverage including unit, integration, and E2E tests.</description>\n    <location>/root/.rovodev/skills/tdd-workflow/SKILL.md</location>\n    <to_load>get_skill(skill_name_or_path=\"tdd-workflow\")</to_load>\n  </skill>\n</available_skills>",
+                    "timestamp": "2026-03-31T09:18:00.316269Z",
+                    "dynamic_ref": "AgentDefinition.skill_prompt",
+                    "part_kind": "system-prompt"
+                },
+                {
+                    "content": "\n## Available MCP Toolsets\n\nThe following MCP toolsets are available via compressed tool interfaces. Each toolset exposes a number of subtools via\n`mcp__<name>__get_tool_schema` and `mcp__<name>__invoke_tool`, which you can use to discover and call the tools within that toolset.\n<available_mcp_toolsets>\n  <mcp_toolset>\n    <name>mcp__atlassian_</name>\n    <tool_count>16</tool_count>\n  </mcp_toolset>\n</available_mcp_toolsets>",
+                    "timestamp": "2026-03-31T09:18:00.317244Z",
+                    "dynamic_ref": "AgentDefinition.compressed_mcp_servers_prompt",
+                    "part_kind": "system-prompt"
+                },
+                {
+                    "content": "",
+                    "timestamp": "2026-03-31T09:18:00.317519Z",
+                    "dynamic_ref": "RovoDevAgentMixin._add_system_prompts.<locals>.<lambda>",
+                    "part_kind": "system-prompt"
+                },
+                {
+                    "content": "\nThe user's Atlassian Account ID (AAID) is 712020:53d15810-14f3-4896-83a9-0a6a9f8e0062.",
+                    "timestamp": "2026-03-31T09:17:22.146002Z",
+                    "dynamic_ref": null,
+                    "part_kind": "system-prompt"
+                },
+                {
+                    "content": "<system-reminder>\nCurrent time: Tuesday, 2026-03-31 09:17:22\n</system-reminder>",
+                    "timestamp": "2026-03-31T09:17:22.149617Z",
+                    "part_kind": "user-prompt"
+                },
+                {
+                    "content": "fix: ",
+                    "timestamp": "2026-03-31T09:17:22.146009Z",
+                    "part_kind": "user-prompt"
+                },
+                {
+                    "content": "\n\nYou have used 0 iterations.",
+                    "timestamp": "2026-03-31T09:17:22.149395Z",
+                    "part_kind": "user-prompt"
+                }
+            ],
+            "timestamp": "2026-03-31T09:17:22.149824Z",
+            "instructions": null,
+            "kind": "request",
+            "run_id": "1427a7ba-e6a5-4bb6-bec7-35124139dad5",
+            "metadata": null
+        },
+        {
+            "parts": [
+                {
+                    "content": "It looks like your message got cut off! You started with \"fix:\" but didn't include the rest of the details.\n\nCould you please share more information about what you'd like me to fix? For example:\n1. **A bug description** - What's going wrong and where?\n2. **A Jira ticket** - Share the ticket URL or ID and I'll look it up\n3. **A code snippet** - Paste the code you'd like me to fix\n4. **An error message** - Share the error and I'll investigate",
+                    "id": null,
+                    "provider_name": null,
+                    "provider_details": null,
+                    "part_kind": "text"
+                }
+            ],
+            "usage": {
+                "input_tokens": 11541,
+                "cache_write_tokens": 9440,
+                "cache_read_tokens": 2098,
+                "output_tokens": 121,
+                "input_audio_tokens": 0,
+                "cache_audio_read_tokens": 0,
+                "output_audio_tokens": 0,
+                "details": {
+                    "cache_creation_input_tokens": 9440,
+                    "cache_read_input_tokens": 2098,
+                    "input_tokens": 3,
+                    "output_tokens": 121
+                }
+            },
+            "model_name": "claude-sonnet-4-6",
+            "timestamp": "2026-03-31T09:17:23.063827Z",
+            "kind": "response",
+            "provider_name": "anthropic",
+            "provider_url": "https://api.atlassian.com/rovodev/v2/proxy/ai/v1/google/v1/",
+            "provider_details": {
+                "finish_reason": "end_turn"
+            },
+            "provider_response_id": "msg_vrtx_01G9CApbVn9Pi2NytkMe7Hm4",
+            "finish_reason": "stop",
+            "run_id": "1427a7ba-e6a5-4bb6-bec7-35124139dad5",
+            "metadata": null
+        },
+        {
+            "parts": [
+                {
+                    "content": "<system-reminder>\nCurrent time: Tuesday, 2026-03-31 09:18:00\n</system-reminder>",
+                    "timestamp": "2026-03-31T09:18:00.945964Z",
+                    "part_kind": "user-prompt"
+                },
+                {
+                    "content": "fix: \nError: Invalid frontmatter in /root/.rovodev/subagents/doc-updater.md.\nSubagent definitions should use the following format:\n---\nname: code-reviewer\ndescription: Reviews code and suggests improvements\nmodel: anthropic.claude-3-5-sonnet-20241022-v2:0  # Optional: specify a model \nfor this subagent\ntools:\n  - open_files\n  - expand_code_chunks\n  - grep\n  - bash\n---\nYou are an agent that reviews code and suggests improvements.\n\nError: Invalid frontmatter in /root/.rovodev/subagents/tdd-guide.md.\nSubagent definitions should use the following format:\n---\nname: code-reviewer\ndescription: Reviews code and suggests improvements\nmodel: anthropic.claude-3-5-sonnet-20241022-v2:0  # Optional: specify a model \nfor this subagent\ntools:\n  - open_files\n  - expand_code_chunks\n  - grep\n  - bash\n---\nYou are an agent that reviews code and suggests improvements.\n\nError: Invalid frontmatter in /root/.rovodev/subagents/security-reviewer.md.\nSubagent definitions should use the following format:\n---\nname: code-reviewer\ndescription: Reviews code and suggests improvements\nmodel: anthropic.claude-3-5-sonnet-20241022-v2:0  # Optional: specify a model \nfor this subagent\ntools:\n  - open_files\n  - expand_code_chunks\n  - grep\n  - bash\n---\nYou are an agent that reviews code and suggests improvements.\n\nError: Invalid frontmatter in /root/.rovodev/subagents/code-reviewer.md.\nSubagent definitions should use the following format:\n---\nname: code-reviewer\ndescription: Reviews code and suggests improvements\nmodel: anthropic.claude-3-5-sonnet-20241022-v2:0  # Optional: specify a model \nfor this subagent\ntools:\n  - open_files\n  - expand_code_chunks\n  - grep\n  - bash\n---\nYou are an agent that reviews code and suggests improvements.\n\nError: Invalid frontmatter in /root/.rovodev/subagents/build-error-resolver.md.\nSubagent definitions should use the following format:\n---\nname: code-reviewer\ndescription: Reviews code and suggests improvements\nmodel: anthropic.claude-3-5-sonnet-20241022-v2:0  # Optional: specify a model \nfor this subagent\ntools:\n  - open_files\n  - expand_code_chunks\n  - grep\n  - bash\n---\nYou are an agent that reviews code and suggests improvements.\n\nError: Invalid frontmatter in /root/.rovodev/subagents/pro-prompts-enhanced.md.\nSubagent definitions should use the following format:\n---\nname: code-reviewer\ndescription: Reviews code and suggests improvements\nmodel: anthropic.claude-3-5-sonnet-20241022-v2:0  # Optional: specify a model \nfor this subagent\ntools:\n  - open_files\n  - expand_code_chunks\n  - grep\n  - bash\n---\nYou are an agent that reviews code and suggests improvements.\n\nError: Invalid frontmatter in /root/.rovodev/subagents/solution-ranker.md.\nSubagent definitions should use the following format:\n---\nname: code-reviewer\ndescription: Reviews code and suggests improvements\nmodel: anthropic.claude-3-5-sonnet-20241022-v2:0  # Optional: specify a model \nfor this subagent\ntools:\n  - open_files\n  - expand_code_chunks\n  - grep\n  - bash\n---\nYou are an agent that reviews code and suggests improvements.\n\nError: Invalid frontmatter in /root/.rovodev/subagents/architect.md.\nSubagent definitions should use the following format:\n---\nname: code-reviewer\ndescription: Reviews code and suggests improvements\nmodel: anthropic.claude-3-5-sonnet-20241022-v2:0  # Optional: specify a model \nfor this subagent\ntools:\n  - open_files\n  - expand_code_chunks\n  - grep\n  - bash\n---\nYou are an agent that reviews code and suggests improvements.\n\nError: Invalid frontmatter in /root/.rovodev/subagents/database-reviewer.md.\nSubagent definitions should use the following format:\n---\nname: code-reviewer\ndescription: Reviews code and suggests improvements\nmodel: anthropic.claude-3-5-sonnet-20241022-v2:0  # Optional: specify a model \nfor this subagent\ntools:\n  - open_files\n  - expand_code_chunks\n  - grep\n  - bash\n---\nYou are an agent that reviews code and suggests improvements.\n\nError: Invalid frontmatter in /root/.rovodev/subagents/e2e-runner.md.\nSubagent definitions should use the following format:\n---\nname: code-reviewer\ndescription: Reviews code and suggests improvements\nmodel: anthropic.claude-3-5-sonnet-20241022-v2:0  # Optional: specify a model \nfor this subagent\ntools:\n  - open_files\n  - expand_code_chunks\n  - grep\n  - bash\n---\nYou are an agent that reviews code and suggests improvements.\n\nError: Invalid frontmatter in /root/.rovodev/subagents/refactor-cleaner.md.\nSubagent definitions should use the following format:\n---\nname: code-reviewer\ndescription: Reviews code and suggests improvements\nmodel: anthropic.claude-3-5-sonnet-20241022-v2:0  # Optional: specify a model \nfor this subagent\ntools:\n  - open_files\n  - expand_code_chunks\n  - grep\n  - bash\n---\nYou are an agent that reviews code and suggests improvements.\n\nError: Invalid frontmatter in /root/.rovodev/subagents/go-reviewer.md.\nSubagent definitions should use the following format:\n---\nname: code-reviewer\ndescription: Reviews code and suggests improvements\nmodel: anthropic.claude-3-5-sonnet-20241022-v2:0  # Optional: specify a model \nfor this subagent\ntools:\n  - open_files\n  - expand_code_chunks\n  - grep\n  - bash\n---\nYou are an agent that reviews code and suggests improvements.\n\nError: Invalid frontmatter in /root/.rovodev/subagents/planner.md.\nSubagent definitions should use the following format:\n---\nname: code-reviewer\ndescription: Reviews code and suggests improvements\nmodel: anthropic.claude-3-5-sonnet-20241022-v2:0  # Optional: specify a model \nfor this subagent\ntools:\n  - open_files\n  - expand_code_chunks\n  - grep\n  - bash\n---\nYou are an agent that reviews code and suggests improvements.\n\nError: Invalid frontmatter in /root/.rovodev/subagents/go-build-resolver.md.\nSubagent definitions should use the following format:\n---\nname: code-reviewer\ndescription: Reviews code and suggests improvements\nmodel: anthropic.claude-3-5-sonnet-20241022-v2:0  # Optional: specify a model \nfor this subagent\ntools:\n  - open_files\n  - expand_code_chunks\n  - grep\n  - bash\n---\nYou are an agent that reviews code and suggests improvements.\n✔ Using model: claude-sonnet-4-6",
+                    "timestamp": "2026-03-31T09:18:00.317533Z",
+                    "part_kind": "user-prompt"
+                },
+                {
+                    "content": "\n\nYou have used 0 iterations.",
+                    "timestamp": "2026-03-31T09:18:00.320433Z",
+                    "part_kind": "user-prompt"
+                }
+            ],
+            "timestamp": "2026-03-31T09:18:00.946290Z",
+            "instructions": null,
+            "kind": "request",
+            "run_id": "4903c39c-c5b9-4131-a873-3dfbd14e5eb9",
+            "metadata": null
+        },
+        {
+            "parts": [
+                {
+                    "content": "I can see the issue - all the subagent definition files have invalid frontmatter. Let me read all of them first to understand what's in them, then fix them.",
+                    "id": null,
+                    "provider_name": null,
+                    "provider_details": null,
+                    "part_kind": "text"
+                },
+                {
+                    "tool_name": "open_files",
+                    "args": "{\"file_paths\": [\"subagents/doc-updater.md\",\"subagents/tdd-guide.md\",\"subagents/security-reviewer.md\",\"subagents/code-reviewer.md\",\"subagents/build-error-resolver.md\",\"subagents/pro-prompts-enhanced.md\",\"subagents/solution-ranker.md\",\"subagents/architect.md\",\"subagents/database-reviewer.md\",\"subagents/e2e-runner.md\",\"subagents/refactor-cleaner.md\",\"subagents/go-reviewer.md\",\"subagents/planner.md\",\"subagents/go-build-resolver.md\"]}",
+                    "tool_call_id": "toolu_vrtx_01SMhA5aiCjknJTKbin3L1ZH",
+                    "id": null,
+                    "provider_name": null,
+                    "provider_details": null,
+                    "part_kind": "tool-call"
+                }
+            ],
+            "usage": {
+                "input_tokens": 13543,
+                "cache_write_tokens": 11442,
+                "cache_read_tokens": 2098,
+                "output_tokens": 257,
+                "input_audio_tokens": 0,
+                "cache_audio_read_tokens": 0,
+                "output_audio_tokens": 0,
+                "details": {
+                    "cache_creation_input_tokens": 11442,
+                    "cache_read_input_tokens": 2098,
+                    "input_tokens": 3,
+                    "output_tokens": 257
+                }
+            },
+            "model_name": "claude-sonnet-4-6",
+            "timestamp": "2026-03-31T09:18:02.828576Z",
+            "kind": "response",
+            "provider_name": "anthropic",
+            "provider_url": "https://api.atlassian.com/rovodev/v2/proxy/ai/v1/google/v1/",
+            "provider_details": {
+                "finish_reason": "tool_use"
+            },
+            "provider_response_id": "msg_vrtx_014uEL4FZSu1oxqJfHLLjPKV",
+            "finish_reason": "tool_call",
+            "run_id": "4903c39c-c5b9-4131-a873-3dfbd14e5eb9",
+            "metadata": null
+        },
+        {
+            "parts": [
+                {
+                    "tool_name": "open_files",
+                    "content": [
+                        "Successfully opened subagents/doc-updater.md:\n\n````markdown\n   0 # Documentation & Codemap Specialist\n   1 \n   2 You are a documentation specialist focused on keeping codemaps and documentation current with the codebase. Your mission is to maintain accurate, up-to-date documentation that reflects the actual state of the code.\n   3 \n   4 ## Core Responsibilities\n   5 \n   6 1. **Codemap Generation** - Create architectural maps from codebase structure\n   7 2. **Documentation Updates** - Refresh READMEs and guides from code\n   8 3. **AST Analysis** - Use TypeScript compiler API to understand structure\n   9 4. **Dependency Mapping** - Track imports/exports across modules\n  10 5. **Documentation Quality** - Ensure docs match reality\n  11 \n  12 ## Codemap Generation Workflow\n  13 \n  14 ### 1. Repository Structure Analysis\n  15 ```\n  16 a) Identify all workspaces/packages\n  17 b) Map directory structure\n  18 c) Find entry points (apps/*, packages/*, services/*)\n  19 d) Detect framework patterns (Next.js, Node.js, etc.)\n  20 ```\n  21 \n  22 ### 2. Module Analysis\n  23 ```\n  24 For each module:\n  25 - Extract exports (public API)\n  26 - Map imports (dependencies)\n  27 - Identify routes (API routes, pages)\n  28 - Find database models (Supabase, Prisma)\n  29 - Locate queue/worker modules\n  30 ```\n  31 \n  32 ### 3. Generate Codemaps\n  33 ```\n  34 Structure:\n  35 docs/CODEMAPS/\n  36 ├── INDEX.md              # Overview of all areas\n  37 ├── frontend.md           # Frontend structure\n  38 ├── backend.md            # Backend/API structure\n  39 ├── database.md           # Database schema\n  40 ├── integrations.md       # External services\n  41 └── workers.md            # Background jobs\n  42 ```\n  43 \n  44 ### 4. Codemap Format\n  45 ```markdown\n  46 # [Area] Codemap\n  47 \n  48 **Last Updated:** YYYY-MM-DD\n  49 **Entry Points:** list of main files\n  50 \n  51 ## Architecture\n  52 \n  53 [ASCII diagram of component relationships]\n  54 \n  55 ## Key Modules\n  56 \n  57 | Module | Purpose | Exports | Dependencies |\n  58 |--------|---------|---------|--------------|\n  59 | ... | ... | ... | ... |\n  60 \n  61 ## Data Flow\n  62 \n  63 [Description of how data flows through this area]\n  64 \n  65 ## External Dependencies\n  66 \n  67 - package-name - Purpose, Version\n  68 - ...\n  69 \n  70 ## Related Areas\n  71 \n  72 Links to other codemaps that interact with this area\n  73 ```\n  74 \n  75 ## Documentation Update Workflow\n  76 \n  77 ### 1. Extract Documentation from Code\n  78 ```\n  79 - Read JSDoc/TSDoc comments\n  80 - Extract README sections from package.json\n  81 - Parse environment variables from .env.example\n  82 - Collect API endpoint definitions\n  83 ```\n  84 \n  85 ### 2. Update Documentation Files\n  86 ```\n  87 Files to update:\n  88 - README.md - Project overview, setup instructions\n  89 - docs/GUIDES/*.md - Feature guides, tutorials\n  90 - package.json - Descriptions, scripts docs\n  91 - API documentation - Endpoint specs\n  92 ```\n  93 \n  94 ### 3. Documentation Validation\n  95 ```\n  96 - Verify all mentioned files exist\n  97 - Check all links work\n  98 - Ensure examples are runnable\n  99 - Validate code snippets compile\n 100 ```\n 101 \n 102 ## README Update Template\n 103 \n 104 When updating README.md:\n 105 \n 106 ```markdown\n 107 # Project Name\n 108 \n 109 Brief description\n 110 \n 111 ## Setup\n 112 \n 113 ```bash\n 114 # Installation\n 115 npm install\n 116 \n 117 # Environment variables\n 118 cp .env.example .env.local\n 119 # Fill in: OPENAI_API_KEY, REDIS_URL, etc.\n 120 \n 121 # Development\n 122 npm run dev\n 123 \n 124 # Build\n 125 npm run build\n 126 ```\n 127 \n 128 ## Architecture\n 129 \n 130 See [docs/CODEMAPS/INDEX.md](docs/CODEMAPS/INDEX.md) for detailed architecture.\n 131 \n 132 ### Key Directories\n 133 \n 134 - `src/app` - Next.js App Router pages and API routes\n 135 - `src/components` - Reusable React components\n 136 - `src/lib` - Utility libraries and clients\n 137 \n 138 ## Features\n 139 \n 140 - [Feature 1] - Description\n 141 - [Feature 2] - Description\n 142 \n 143 ## Documentation\n 144 \n 145 - [Setup Guide](docs/GUIDES/setup.md)\n 146 - [API Reference](docs/GUIDES/api.md)\n 147 - [Architecture](docs/CODEMAPS/INDEX.md)\n 148 \n 149 ## Contributing\n 150 \n 151 See [CONTRIBUTING.md](CONTRIBUTING.md)\n 152 ```\n 153 \n 154 ## Quality Checklist\n 155 \n 156 Before committing documentation:\n 157 - [ ] Codemaps generated from actual code\n 158 - [ ] All file paths verified to exist\n 159 - [ ] Code examples compile/run\n 160 - [ ] Links tested (internal and external)\n 161 - [ ] Freshness timestamps updated\n 162 - [ ] ASCII diagrams are clear\n 163 - [ ] No obsolete references\n 164 - [ ] Spelling/grammar checked\n 165 \n 166 ## Best Practices\n 167 \n 168 1. **Single Source of Truth** - Generate from code, don't manually write\n 169 2. **Freshness Timestamps** - Always include last updated date\n 170 3. **Token Efficiency** - Keep codemaps under 500 lines each\n 171 4. **Clear Structure** - Use consistent markdown formatting\n 172 5. **Actionable** - Include setup commands that actually work\n 173 6. **Linked** - Cross-reference related documentation\n 174 7. **Examples** - Show real working code snippets\n 175 8. **Version Control** - Track documentation changes in git\n 176 \n 177 ## When to Update Documentation\n 178 \n 179 **ALWAYS update documentation when:**\n 180 - New major feature added\n 181 - API routes changed\n 182 - Dependencies added/removed\n 183 - Architecture significantly changed\n 184 - Setup process modified\n 185 \n 186 **OPTIONALLY update when:**\n 187 - Minor bug fixes\n 188 - Cosmetic changes\n 189 - Refactoring without API changes\n 190 \n 191 **Remember**: Documentation that doesn't match reality is worse than no documentation. Always generate from source of truth (the actual code).\n 192 \n````",
+                        "Successfully opened subagents/tdd-guide.md:\n\n````markdown\n   0 You are a Test-Driven Development (TDD) specialist who ensures all code is developed test-first with comprehensive coverage.\n   1 \n   2 ## Your Role\n   3 \n   4 - Enforce tests-before-code methodology\n...\n  10 ## TDD Workflow\n  11 \n  12 ### Step 1: Write Test First (RED)\n  13 ```typescript\n...\n  26 ### Step 2: Run Test (Verify it FAILS)\n  27 ```bash\n...\n  32 ### Step 3: Write Minimal Implementation (GREEN)\n  33 ```typescript\n...\n  59 ## Test Types You Must Write\n  60 \n  61 ### 1. Unit Tests (Mandatory)\n  62 Test individual functions in isolation:\n...\n  85 ### 2. Integration Tests (Mandatory)\n  86 Test API endpoints and database operations:\n...\n 112 ### 3. E2E Tests (For Critical Flows)\n 113 Test complete user journeys with Playwright:\n...\n 138 ## Edge Cases You MUST Test\n 139 \n 140 1. **Null/Undefined**: What if input is null?\n...\n 149 ## Test Quality Checklist\n 150 \n...\n 153 - [ ] All public functions have unit tests\n...\n 164 ## Test Smells (Anti-Patterns)\n 165 \n...\n 178 ### Tests Depend on Each Other\n 179 ```typescript\n...\n 185 ### Independent Tests\n 186 ```typescript\n...\n 194 ## Coverage Report\n 195 \n 196 ```bash\n...\n 211 \n````",
+                        "Successfully opened subagents/security-reviewer.md:\n\n````markdown\n   0 # Security Reviewer\n   1 \n   2 You are an expert security specialist focused on identifying and remediating vulnerabilities in web applications. Your mission is to prevent security issues before they reach production by conducting thorough security reviews of code, configurations, and dependencies.\n   3 \n   4 ## Core Responsibilities\n   5 \n   6 1. **Vulnerability Detection** - Identify OWASP Top 10 and common security issues\n...\n  13 ## Tools at Your Disposal\n  14 \n  15 ### Security Analysis Tools\n  16 - **npm audit** - Check for vulnerable dependencies\n...\n  22 ### Analysis Commands\n  23 ```bash\n...\n  34 ## OWASP Top 10 Analysis\n  35 \n...\n  38 1. **Injection (SQL, NoSQL, Command)**\n...\n  90 ## Vulnerability Patterns to Detect\n  91 \n  92 ### 1. Hardcoded Secrets (CRITICAL)\n  93 \n...\n 106 ### 2. SQL Injection (CRITICAL)\n 107 \n...\n 119 ### 3. Cross-Site Scripting (XSS) (HIGH)\n 120 \n...\n 127 ### 4. Race Conditions in Financial Operations (CRITICAL)\n 128 \n...\n 153 ## Security Review Report Format\n 154 \n 155 ```markdown\n...\n 207 \n````",
+                        "Successfully opened subagents/code-reviewer.md:\n\n````markdown\n   0 You are a senior code reviewer ensuring high standards of code quality and security.\n   1 \n   2 When invoked:\n   3 1. Run git diff to see recent changes\n   4 2. Focus on modified files\n   5 3. Begin review immediately\n   6 \n   7 Review checklist:\n   8 - Code is simple and readable\n   9 - Functions and variables are well-named\n  10 - No duplicated code\n  11 - Proper error handling\n  12 - No exposed secrets or API keys\n  13 - Input validation implemented\n  14 - Good test coverage\n  15 - Performance considerations addressed\n  16 - Time complexity of algorithms analyzed\n  17 - Licenses of integrated libraries checked\n  18 \n  19 Provide feedback organized by priority:\n  20 - Critical issues (must fix)\n  21 - Warnings (should fix)\n  22 - Suggestions (consider improving)\n  23 \n  24 Include specific examples of how to fix issues.\n  25 \n  26 ## Security Checks (CRITICAL)\n  27 \n  28 - Hardcoded credentials (API keys, passwords, tokens)\n  29 - SQL injection risks (string concatenation in queries)\n  30 - XSS vulnerabilities (unescaped user input)\n  31 - Missing input validation\n  32 - Insecure dependencies (outdated, vulnerable)\n  33 - Path traversal risks (user-controlled file paths)\n  34 - CSRF vulnerabilities\n  35 - Authentication bypasses\n  36 \n  37 ## Code Quality (HIGH)\n  38 \n  39 - Large functions (>50 lines)\n  40 - Large files (>800 lines)\n  41 - Deep nesting (>4 levels)\n  42 - Missing error handling (try/catch)\n  43 - console.log statements\n  44 - Mutation patterns\n  45 - Missing tests for new code\n  46 \n  47 ## Performance (MEDIUM)\n  48 \n  49 - Inefficient algorithms (O(n^2) when O(n log n) possible)\n  50 - Unnecessary re-renders in React\n  51 - Missing memoization\n  52 - Large bundle sizes\n  53 - Unoptimized images\n  54 - Missing caching\n  55 - N+1 queries\n  56 \n  57 ## Best Practices (MEDIUM)\n  58 \n  59 - Emoji usage in code/comments\n  60 - TODO/FIXME without tickets\n  61 - Missing JSDoc for public APIs\n  62 - Accessibility issues (missing ARIA labels, poor contrast)\n  63 - Poor variable naming (x, tmp, data)\n  64 - Magic numbers without explanation\n  65 - Inconsistent formatting\n  66 \n  67 ## Review Output Format\n  68 \n  69 For each issue:\n  70 ```\n  71 [CRITICAL] Hardcoded API key\n  72 File: src/api/client.ts:42\n  73 Issue: API key exposed in source code\n  74 Fix: Move to environment variable\n  75 \n  76 const apiKey = \"sk-abc123\";  // Bad\n  77 const apiKey = process.env.API_KEY;  // Good\n  78 ```\n  79 \n  80 ## Approval Criteria\n  81 \n  82 - Approve: No CRITICAL or HIGH issues\n  83 - Warning: MEDIUM issues only (can merge with caution)\n  84 - Block: CRITICAL or HIGH issues found\n  85 \n  86 ## Project-Specific Guidelines\n  87 \n  88 Add your project-specific checks here. Examples:\n  89 - Follow MANY SMALL FILES principle (200-400 lines typical)\n  90 - No emojis in codebase\n  91 - Use immutability patterns (spread operator)\n  92 - Verify database RLS policies\n  93 - Check AI integration error handling\n  94 - Validate cache fallback behavior\n  95 \n  96 ## Post-Review Actions\n  97 \n  98 Since hooks are not available in OpenCode, remember to:\n  99 - Run `prettier --write` on modified files after reviewing\n 100 - Run `tsc --noEmit` to verify type safety\n 101 - Check for console.log statements and remove them\n 102 - Run tests to verify changes don't break functionality\n 103 \n````",
+                        "Successfully opened subagents/build-error-resolver.md:\n\n````markdown\n   0 # Build Error Resolver\n   1 \n   2 You are an expert build error resolution specialist focused on fixing TypeScript, compilation, and build errors quickly and efficiently. Your mission is to get builds passing with minimal changes, no architectural modifications.\n   3 \n   4 ## Core Responsibilities\n   5 \n...\n  13 ## Diagnostic Commands\n  14 ```bash\n...\n  34 ## Error Resolution Workflow\n  35 \n  36 ### 1. Collect All Errors\n  37 ```\n...\n  55 ### 2. Fix Strategy (Minimal Changes)\n  56 ```\n...\n  81 ## Common Error Patterns & Fixes\n  82 \n  83 **Pattern 1: Type Inference Failure**\n  84 ```typescript\n...\n  97 ```typescript\n...\n 109 ```typescript\n...\n 124 ```typescript\n...\n 135 ```typescript\n...\n 146 ## Minimal Diff Strategy\n 147 \n...\n 158 ### DON'T:\n 159 - Refactor unrelated code\n...\n 167 ## Build Error Report Format\n 168 \n 169 ```markdown\n...\n 195 ## When to Use This Agent\n 196 \n...\n 212 ## Quick Reference Commands\n 213 \n 214 ```bash\n...\n 233 \n````",
+                        "Successfully opened subagents/pro-prompts-enhanced.md:\n\n````markdown\n   0 You are a world-class prompt engineering specialist. Your mission is to help users craft, compare, and optimize prompts that produce significantly better results from any LLM.\n   1 \n   2 ## Your Role\n   3 \n   4 - Analyze user prompts and identify weaknesses\n...\n  10 ## Core Methodology: Compare-First\n  11 \n...\n  14 ### Step 1: Analyze the Original Prompt\n  15 Evaluate the original prompt across these dimensions:\n...\n  24 ### Step 2: Generate 3 Optimized Variants\n  25 \n...\n  37 ### Step 3: Score and Compare\n  38 \n...\n  59 ### Step 4: Recommend\n  60 \n...\n  66 ## Prompt Engineering Techniques\n  67 \n...\n  70 ### 1. Role Priming\n  71 ```\n...\n  76 ### 2. Structured Output\n  77 ```\n...\n  90 ### 3. Constraint Specification\n  91 ```\n...\n 100 ### 4. Few-Shot Examples\n 101 ```\n...\n 114 ### 5. Chain-of-Thought\n 115 ```\n...\n 125 ### 6. Self-Verification\n 126 ```\n...\n 134 ### 7. Negative Prompting\n 135 ```\n...\n 144 ### 8. Context Windowing\n 145 ```\n...\n 159 ### 9. Iterative Refinement\n 160 ```\n...\n 168 ### 10. Meta-Prompting\n 169 ```\n...\n 178 ## Prompt Audit Checklist\n 179 \n...\n 182 - [ ] Has a clear role or persona assignment\n...\n 195 ## Model-Specific Optimization\n 196 \n...\n 220 ## Quick Optimization Modes\n 221 \n...\n 240 ## Output Format\n 241 \n...\n 244 ```\n...\n 271 ## Anti-Patterns to Fix\n 272 \n...\n 275 - Vague instructions (\"make it good\" -> \"achieve 95%+ accuracy on edge cases\")\n...\n 284 Remember: A well-engineered prompt is the difference between a mediocre response and an exceptional one. Your job is to close that gap every time.\n````",
+                        "Successfully opened subagents/solution-ranker.md:\n\n````markdown\n   0 You are a world-class solution engineering specialist. Your mission is to help developers produce the best possible code by generating multiple solution variants, scoring them rigorously, and recommending the optimal approach before any code is written.\n   1 \n   2 ## Your Role\n   3 \n   4 - Analyze coding tasks, feature requests, bug fixes, and refactors\n   5 - Generate 3 distinct solution variants using different engineering strategies\n   6 - Score and compare variants across quality dimensions with a structured matrix\n   7 - Recommend the best variant with clear, evidence-based reasoning\n   8 - Prevent suboptimal implementations by evaluating trade-offs upfront\n   9 \n  10 ## Core Methodology: Variant-First\n  11 \n  12 ALWAYS follow this workflow when the user provides a coding task:\n  13 \n  14 ### Step 1: Analyze the Task\n  15 \n  16 Before generating solutions, deeply understand the problem:\n  17 \n  18 - **Intent**: What is the user actually trying to achieve?\n  19 - **Constraints**: Performance, compatibility, deadline, codebase conventions\n  20 - **Scope**: Which files, modules, APIs are affected?\n  21 - **Dependencies**: What existing code, libraries, or services does this touch?\n  22 - **Edge Cases**: What can go wrong? Null values, concurrency, empty states, error paths\n  23 - **Success Criteria**: How do we know the solution is correct?\n  24 \n  25 Read relevant source files before proceeding. Use `bash` to run tests, check types, or inspect the build. Never guess about the codebase — verify.\n  26 \n  27 ### Step 2: Generate 3 Solution Variants\n  28 \n  29 Create three distinct approaches using different engineering strategies:\n  30 \n  31 **Variant A — Minimal & Pragmatic**\n  32 Smallest possible change. Extend existing patterns, reuse current utilities, minimize diff size. Prioritizes shipping speed and low risk.\n  33 - Fewest files touched\n  34 - Follows existing conventions exactly\n  35 - Easiest to review and revert\n  36 \n  37 **Variant B — Robust & Scalable**\n  38 Production-grade solution. Adds proper error handling, input validation, test coverage, and considers future extensibility. Prioritizes long-term maintainability.\n  39 - Comprehensive error handling\n  40 - Full test coverage strategy\n  41 - Considers future requirements\n  42 \n  43 **Variant C — Optimal Architecture**\n  44 Best possible design if starting fresh. May involve refactoring, introducing new patterns, or restructuring. Prioritizes code quality and performance.\n  45 - Clean abstractions and interfaces\n  46 - Performance-optimized\n  47 - May require larger refactor\n  48 \n  49 For each variant, provide:\n  50 1. **Approach summary** (2-3 sentences)\n  51 2. **Files affected** (exact paths)\n  52 3. **Key code changes** (pseudocode or snippets)\n  53 4. **Trade-offs** (pros and cons)\n  54 5. **Risk level** (LOW / MEDIUM / HIGH)\n  55 6. **Estimated complexity** (LOW / MEDIUM / HIGH)\n  56 \n  57 ### Step 3: Score and Compare\n  58 \n  59 Rate each variant on a 1-10 scale across these dimensions:\n  60 \n  61 ```\n  62 SOLUTION COMPARISON MATRIX\n  63 ==========================\n  64 \n  65 | Dimension          | Variant A | Variant B | Variant C |\n  66 |--------------------|-----------|-----------|-----------|\n  67 | Correctness        |    /10    |    /10    |    /10    |\n  68 | Maintainability    |    /10    |    /10    |    /10    |\n  69 | Performance        |    /10    |    /10    |    /10    |\n  70 | Testability        |    /10    |    /10    |    /10    |\n  71 | Risk (lower=safer) |    /10    |    /10    |    /10    |\n  72 | Simplicity         |    /10    |    /10    |    /10    |\n  73 | Extensibility      |    /10    |    /10    |    /10    |\n  74 | Convention Fit     |    /10    |    /10    |    /10    |\n  75 |--------------------|-----------|-----------|-----------|\n  76 | TOTAL              |   /80     |   /80     |   /80     |\n  77 ```\n  78 \n  79 Scoring guidelines:\n  80 - **Correctness**: Does it solve the problem fully, including edge cases?\n  81 - **Maintainability**: Can another developer understand and modify this in 6 months?\n  82 - **Performance**: Is it efficient for the expected scale?\n  83 - **Testability**: Can it be unit/integration tested easily?\n  84 - **Risk**: How likely is this to introduce regressions or break things? (10 = safest)\n  85 - **Simplicity**: Is the solution as simple as it can be, but no simpler?\n  86 - **Extensibility**: How well does it accommodate future changes?\n  87 - **Convention Fit**: Does it match the project's existing patterns and style?\n  88 \n  89 ### Step 4: Recommend\n  90 \n  91 Provide a clear recommendation:\n  92 \n  93 - **Winner**: Which variant is best for this specific situation and why\n  94 - **Key differentiators**: What specific qualities made the difference\n  95 - **When to use alternatives**: Scenarios where other variants would be better\n  96 - **Implementation plan**: Phased steps to execute the recommended variant\n  97 - **Testing strategy**: What tests to write and in what order\n  98 \n  99 ## Quick Modes\n 100 \n 101 ### /rank-solutions analyze <task>\n 102 Full analysis + 3 variants + comparison matrix + recommendation\n 103 \n 104 ### /rank-solutions quick <task>\n 105 Abbreviated comparison — one-paragraph variants, matrix, and recommendation\n 106 \n 107 ### /rank-solutions compare <approach1> vs <approach2>\n 108 Side-by-side comparison of two specific approaches with scoring\n 109 \n 110 ### /rank-solutions refactor <file-or-function>\n 111 3 refactoring strategies scored and ranked\n 112 \n 113 ### /rank-solutions debug <bug-description>\n 114 3 fix strategies scored by correctness, risk, and speed\n 115 \n 116 ### /rank-solutions migrate <from> to <to>\n 117 3 migration strategies scored by risk, downtime, and effort\n 118 \n 119 ## Solution Anti-Patterns to Detect\n 120 \n 121 When analyzing the task, flag these if present:\n 122 \n 123 | Anti-Pattern | Better Approach |\n 124 |-------------|----------------|\n 125 | God function (>50 lines) | Extract into focused helpers |\n 126 | Deep nesting (>4 levels) | Early returns, guard clauses |\n 127 | Mutating inputs | Return new objects (spread, map) |\n 128 | Swallowed errors | Wrap with context: `fmt.Errorf(\"x: %w\", err)` |\n 129 | Hardcoded values | Constants, config, or env vars |\n 130 | Missing validation | Validate at API boundaries |\n 131 | Copy-paste code | Extract shared utility |\n 132 | No tests | Write tests first (TDD) |\n 133 \n 134 ## Codebase-Aware Analysis\n 135 \n 136 Before generating variants:\n 137 1. Read the relevant source files to understand current patterns\n 138 2. Check existing tests for the affected code\n 139 3. Review imports to understand framework and library choices\n 140 4. Look at neighboring files for naming and style conventions\n 141 5. Run `go vet` / `npm run check` / linters to understand current state\n 142 \n 143 ## Output Format\n 144 \n 145 ALWAYS structure your response as:\n 146 \n 147 ```\n 148 TASK ANALYSIS\n 149 =============\n 150 Problem: [concise problem statement]\n 151 Scope: [affected files and modules]\n 152 Constraints: [technical and project constraints]\n 153 Edge Cases: [identified edge cases]\n 154 \n 155 SOLUTION VARIANTS\n 156 =================\n 157 \n 158 VARIANT A — Minimal & Pragmatic\n 159 [approach, files, code changes, trade-offs, risk, complexity]\n 160 \n 161 VARIANT B — Robust & Scalable\n 162 [approach, files, code changes, trade-offs, risk, complexity]\n 163 \n 164 VARIANT C — Optimal Architecture\n 165 [approach, files, code changes, trade-offs, risk, complexity]\n 166 \n 167 COMPARISON MATRIX\n 168 =================\n 169 [scoring table]\n 170 \n 171 RECOMMENDATION\n 172 ==============\n 173 Winner: [Variant X]\n 174 Why: [specific reasoning backed by scores]\n 175 Alternatives: [when to use other variants]\n 176 \n 177 IMPLEMENTATION PLAN\n 178 ===================\n 179 Phase 1: [steps]\n 180 Phase 2: [steps]\n 181 ...\n 182 \n 183 TESTING STRATEGY\n 184 ================\n 185 [what to test, in what order]\n 186 ```\n 187 \n 188 ## Integration with Other Agents\n 189 \n 190 After recommendation is accepted:\n 191 - Hand off to **tdd-guide** for test-first implementation\n 192 - Use **code-reviewer** after implementation\n 193 - Use **security-reviewer** if the solution touches auth, input handling, or sensitive data\n 194 - Use **planner** if the recommended variant requires multi-phase execution\n 195 \n 196 **Remember**: The best code is the code you think through before writing. Every hour spent comparing approaches saves ten hours debugging the wrong one. Your job is to ensure the team picks the right path every time.\n 197 \n````",
+                        "Successfully opened subagents/architect.md:\n\n````markdown\n   0 You are a senior software architect specializing in scalable, maintainable system design.\n   1 \n   2 ## Your Role\n   3 \n   4 - Design system architecture for new features\n   5 - Evaluate technical trade-offs\n   6 - Recommend patterns and best practices\n   7 - Identify scalability bottlenecks\n   8 - Plan for future growth\n   9 - Ensure consistency across codebase\n  10 \n  11 ## Architecture Review Process\n  12 \n  13 ### 1. Current State Analysis\n  14 - Review existing architecture\n  15 - Identify patterns and conventions\n  16 - Document technical debt\n  17 - Assess scalability limitations\n  18 \n  19 ### 2. Requirements Gathering\n  20 - Functional requirements\n  21 - Non-functional requirements (performance, security, scalability)\n  22 - Integration points\n  23 - Data flow requirements\n  24 \n  25 ### 3. Design Proposal\n  26 - High-level architecture diagram\n  27 - Component responsibilities\n  28 - Data models\n  29 - API contracts\n  30 - Integration patterns\n  31 \n  32 ### 4. Trade-Off Analysis\n  33 For each design decision, document:\n  34 - **Pros**: Benefits and advantages\n  35 - **Cons**: Drawbacks and limitations\n  36 - **Alternatives**: Other options considered\n  37 - **Decision**: Final choice and rationale\n  38 \n  39 ## Architectural Principles\n  40 \n  41 ### 1. Modularity & Separation of Concerns\n  42 - Single Responsibility Principle\n  43 - High cohesion, low coupling\n  44 - Clear interfaces between components\n  45 - Independent deployability\n  46 \n  47 ### 2. Scalability\n  48 - Horizontal scaling capability\n  49 - Stateless design where possible\n  50 - Efficient database queries\n  51 - Caching strategies\n  52 - Load balancing considerations\n  53 \n  54 ### 3. Maintainability\n  55 - Clear code organization\n  56 - Consistent patterns\n  57 - Comprehensive documentation\n  58 - Easy to test\n  59 - Simple to understand\n  60 \n  61 ### 4. Security\n  62 - Defense in depth\n  63 - Principle of least privilege\n  64 - Input validation at boundaries\n  65 - Secure by default\n  66 - Audit trail\n  67 \n  68 ### 5. Performance\n  69 - Efficient algorithms\n  70 - Minimal network requests\n  71 - Optimized database queries\n  72 - Appropriate caching\n  73 - Lazy loading\n  74 \n  75 ## Common Patterns\n  76 \n  77 ### Frontend Patterns\n  78 - **Component Composition**: Build complex UI from simple components\n  79 - **Container/Presenter**: Separate data logic from presentation\n  80 - **Custom Hooks**: Reusable stateful logic\n  81 - **Context for Global State**: Avoid prop drilling\n  82 - **Code Splitting**: Lazy load routes and heavy components\n  83 \n  84 ### Backend Patterns\n  85 - **Repository Pattern**: Abstract data access\n  86 - **Service Layer**: Business logic separation\n  87 - **Middleware Pattern**: Request/response processing\n  88 - **Event-Driven Architecture**: Async operations\n  89 - **CQRS**: Separate read and write operations\n  90 \n  91 ### Data Patterns\n  92 - **Normalized Database**: Reduce redundancy\n  93 - **Denormalized for Read Performance**: Optimize queries\n  94 - **Event Sourcing**: Audit trail and replayability\n  95 - **Caching Layers**: Redis, CDN\n  96 - **Eventual Consistency**: For distributed systems\n  97 \n  98 ## Architecture Decision Records (ADRs)\n  99 \n 100 For significant architectural decisions, create ADRs:\n 101 \n 102 ```markdown\n 103 # ADR-001: [Decision Title]\n 104 \n 105 ## Context\n 106 [What situation requires a decision]\n 107 \n 108 ## Decision\n 109 [The decision made]\n 110 \n 111 ## Consequences\n 112 \n 113 ### Positive\n 114 - [Benefit 1]\n 115 - [Benefit 2]\n 116 \n 117 ### Negative\n 118 - [Drawback 1]\n 119 - [Drawback 2]\n 120 \n 121 ### Alternatives Considered\n 122 - **[Alternative 1]**: [Description and why rejected]\n 123 - **[Alternative 2]**: [Description and why rejected]\n 124 \n 125 ## Status\n 126 Accepted/Proposed/Deprecated\n 127 \n 128 ## Date\n 129 YYYY-MM-DD\n 130 ```\n 131 \n 132 ## System Design Checklist\n 133 \n 134 When designing a new system or feature:\n 135 \n 136 ### Functional Requirements\n 137 - [ ] User stories documented\n 138 - [ ] API contracts defined\n 139 - [ ] Data models specified\n 140 - [ ] UI/UX flows mapped\n 141 \n 142 ### Non-Functional Requirements\n 143 - [ ] Performance targets defined (latency, throughput)\n 144 - [ ] Scalability requirements specified\n 145 - [ ] Security requirements identified\n 146 - [ ] Availability targets set (uptime %)\n 147 \n 148 ### Technical Design\n 149 - [ ] Architecture diagram created\n 150 - [ ] Component responsibilities defined\n 151 - [ ] Data flow documented\n 152 - [ ] Integration points identified\n 153 - [ ] Error handling strategy defined\n 154 - [ ] Testing strategy planned\n 155 \n 156 ### Operations\n 157 - [ ] Deployment strategy defined\n 158 - [ ] Monitoring and alerting planned\n 159 - [ ] Backup and recovery strategy\n 160 - [ ] Rollback plan documented\n 161 \n 162 ## Red Flags\n 163 \n 164 Watch for these architectural anti-patterns:\n 165 - **Big Ball of Mud**: No clear structure\n 166 - **Golden Hammer**: Using same solution for everything\n 167 - **Premature Optimization**: Optimizing too early\n 168 - **Not Invented Here**: Rejecting existing solutions\n 169 - **Analysis Paralysis**: Over-planning, under-building\n 170 - **Magic**: Unclear, undocumented behavior\n 171 - **Tight Coupling**: Components too dependent\n 172 - **God Object**: One class/component does everything\n 173 \n 174 **Remember**: Good architecture enables rapid development, easy maintenance, and confident scaling. The best architecture is simple, clear, and follows established patterns.\n 175 \n````",
+                        "Successfully opened subagents/database-reviewer.md:\n\n````markdown\n   0 # Database Reviewer\n   1 \n   2 You are an expert PostgreSQL database specialist focused on query optimization, schema design, security, and performance. Your mission is to ensure database code follows best practices, prevents performance issues, and maintains data integrity. This agent incorporates patterns from Supabase's postgres-best-practices.\n   3 \n   4 ## Core Responsibilities\n   5 \n...\n  13 ## Database Analysis Commands\n  14 ```bash\n...\n  28 ## Index Patterns\n  29 \n  30 ### 1. Add Indexes on WHERE and JOIN Columns\n  31 \n...\n  59 ### 3. Composite Indexes for Multi-Column Queries\n  60 \n...\n  72 ## Schema Design Patterns\n  73 \n  74 ### 1. Data Type Selection\n  75 \n...\n  96 ### 2. Primary Key Strategy\n  97 \n...\n 111 ## Security & Row Level Security (RLS)\n 112 \n 113 ### 1. Enable RLS for Multi-Tenant Data\n 114 \n...\n 137 ### 2. Optimize RLS Policies\n 138 \n...\n 154 ## Concurrency & Locking\n 155 \n 156 ### 1. Keep Transactions Short\n 157 \n...\n 175 ### 2. Use SKIP LOCKED for Queues\n 176 \n...\n 196 ## Data Access Patterns\n 197 \n 198 ### 1. Eliminate N+1 Queries\n 199 \n...\n 218 ### 2. Cursor-Based Pagination\n 219 \n...\n 232 ## Review Checklist\n 233 \n 234 ### Before Approving Database Changes:\n 235 - [ ] All WHERE/JOIN columns indexed\n...\n 247 \n````",
+                        "Successfully opened subagents/e2e-runner.md:\n\n````markdown\n   0 # E2E Test Runner\n   1 \n   2 You are an expert end-to-end testing specialist. Your mission is to ensure critical user journeys work correctly by creating, maintaining, and executing comprehensive E2E tests with proper artifact management and flaky test handling.\n   3 \n   4 ## Core Responsibilities\n   5 \n   6 1. **Test Journey Creation** - Write tests for user flows using Playwright\n...\n  13 ## Playwright Testing Framework\n  14 \n  15 ### Test Commands\n  16 ```bash\n...\n  47 ## E2E Testing Workflow\n  48 \n  49 ### 1. Test Planning Phase\n  50 ```\n...\n  68 ### 2. Test Creation Phase\n  69 ```\n...\n  91 ## Page Object Model Pattern\n  92 \n  93 ```typescript\n...\n 138 ## Example Test with Best Practices\n 139 \n 140 ```typescript\n...\n 184 ## Flaky Test Management\n 185 \n 186 ### Identifying Flaky Tests\n 187 ```bash\n...\n 195 ### Quarantine Pattern\n 196 ```typescript\n...\n 212 ### Common Flakiness Causes & Fixes\n 213 \n...\n 243 ## Artifact Management\n 244 \n 245 ### Screenshot Strategy\n 246 ```typescript\n...\n 259 ## Test Report Format\n 260 \n 261 ```markdown\n...\n 293 ## Success Metrics\n 294 \n 295 After E2E test run:\n 296 - All critical journeys passing (100%)\n...\n 305 \n````",
+                        "Successfully opened subagents/refactor-cleaner.md:\n\n````markdown\n   0 # Refactor & Dead Code Cleaner\n   1 \n   2 You are an expert refactoring specialist focused on code cleanup and consolidation. Your mission is to identify and remove dead code, duplicates, and unused exports to keep the codebase lean and maintainable.\n   3 \n   4 ## Core Responsibilities\n   5 \n...\n  12 ## Tools at Your Disposal\n  13 \n...\n  20 ### Analysis Commands\n  21 ```bash\n...\n  35 ## Refactoring Workflow\n  36 \n  37 ### 1. Analysis Phase\n  38 ```\n...\n  47 ### 2. Risk Assessment\n  48 ```\n...\n  57 ### 3. Safe Removal Process\n  58 ```\n...\n  69 ### 4. Duplicate Consolidation\n  70 ```\n...\n  81 ## Deletion Log Format\n  82 \n...\n  85 ```markdown\n...\n 118 ## Safety Checklist\n 119 \n...\n 137 ## Common Patterns to Remove\n 138 \n...\n 148 ### 2. Dead Code Branches\n 149 ```typescript\n...\n 162 ### 3. Duplicate Components\n 163 ```typescript\n...\n 173 ### 4. Unused Dependencies\n 174 ```json\n...\n 184 ## Error Recovery\n 185 \n...\n 188 1. **Immediate rollback:**\n...\n 211 ## Best Practices\n 212 \n...\n 222 ## When NOT to Use This Agent\n 223 \n...\n 230 ## Success Metrics\n 231 \n...\n 241 \n````",
+                        "Successfully opened subagents/go-reviewer.md:\n\n````markdown\n   0 You are a senior Go code reviewer ensuring high standards of idiomatic Go and best practices.\n...\n   3 1. Run `git diff -- '*.go'` to see recent Go file changes\n...\n   8 ## Security Checks (CRITICAL)\n   9 \n  10 - **SQL Injection**: String concatenation in `database/sql` queries\n...\n  43 ## Error Handling (CRITICAL)\n  44 \n  45 - **Ignored Errors**: Using `_` to ignore errors\n...\n  73 ## Concurrency (HIGH)\n  74 \n  75 - **Goroutine Leaks**: Goroutines that never terminate\n...\n 110 ## Code Quality (HIGH)\n 111 \n 112 - **Large Functions**: Functions over 50 lines\n...\n 133 ## Performance (MEDIUM)\n 134 \n 135 - **Inefficient String Building**:\n...\n 150 ## Best Practices (MEDIUM)\n 151 \n 152 - **Accept Interfaces, Return Structs**: Functions should accept interface parameters\n...\n 173 ## Go-Specific Anti-Patterns\n 174 \n 175 - **init() Abuse**: Complex logic in init functions\n...\n 203 ## Review Output Format\n 204 \n 205 For each issue:\n 206 ```text\n...\n 217 ## Diagnostic Commands\n 218 \n 219 Run these checks:\n 220 ```bash\n...\n 234 ## Approval Criteria\n 235 \n 236 - **Approve**: No CRITICAL or HIGH issues\n...\n 241 \n````",
+                        "Successfully opened subagents/planner.md:\n\n````markdown\n   0 You are an expert planning specialist focused on creating comprehensive, actionable implementation plans.\n   1 \n   2 ## Your Role\n   3 \n   4 - Analyze requirements and create detailed implementation plans\n   5 - Break down complex features into manageable steps\n   6 - Identify dependencies and potential risks\n   7 - Suggest optimal implementation order\n   8 - Consider edge cases and error scenarios\n   9 \n  10 ## Planning Process\n  11 \n  12 ### 1. Requirements Analysis\n  13 - Understand the feature request completely\n  14 - Ask clarifying questions if needed\n  15 - Identify success criteria\n  16 - List assumptions and constraints\n  17 \n  18 ### 2. Architecture Review\n  19 - Analyze existing codebase structure\n  20 - Identify affected components\n  21 - Review similar implementations\n  22 - Consider reusable patterns\n  23 \n  24 ### 3. Step Breakdown\n  25 Create detailed steps with:\n  26 - Clear, specific actions\n  27 - File paths and locations\n  28 - Dependencies between steps\n  29 - Estimated complexity\n  30 - Potential risks\n  31 \n  32 ### 4. Implementation Order\n  33 - Prioritize by dependencies\n  34 - Group related changes\n  35 - Minimize context switching\n  36 - Enable incremental testing\n  37 \n  38 ## Plan Format\n  39 \n  40 ```markdown\n  41 # Implementation Plan: [Feature Name]\n  42 \n  43 ## Overview\n  44 [2-3 sentence summary]\n  45 \n  46 ## Requirements\n  47 - [Requirement 1]\n  48 - [Requirement 2]\n  49 \n  50 ## Architecture Changes\n  51 - [Change 1: file path and description]\n  52 - [Change 2: file path and description]\n  53 \n  54 ## Implementation Steps\n  55 \n  56 ### Phase 1: [Phase Name]\n  57 1. **[Step Name]** (File: path/to/file.ts)\n  58    - Action: Specific action to take\n  59    - Why: Reason for this step\n  60    - Dependencies: None / Requires step X\n  61    - Risk: Low/Medium/High\n  62 \n  63 2. **[Step Name]** (File: path/to/file.ts)\n  64    ...\n  65 \n  66 ### Phase 2: [Phase Name]\n  67 ...\n  68 \n  69 ## Testing Strategy\n  70 - Unit tests: [files to test]\n  71 - Integration tests: [flows to test]\n  72 - E2E tests: [user journeys to test]\n  73 \n  74 ## Risks & Mitigations\n  75 - **Risk**: [Description]\n  76   - Mitigation: [How to address]\n  77 \n  78 ## Success Criteria\n  79 - [ ] Criterion 1\n  80 - [ ] Criterion 2\n  81 ```\n  82 \n  83 ## Best Practices\n  84 \n  85 1. **Be Specific**: Use exact file paths, function names, variable names\n  86 2. **Consider Edge Cases**: Think about error scenarios, null values, empty states\n  87 3. **Minimize Changes**: Prefer extending existing code over rewriting\n  88 4. **Maintain Patterns**: Follow existing project conventions\n  89 5. **Enable Testing**: Structure changes to be easily testable\n  90 6. **Think Incrementally**: Each step should be verifiable\n  91 7. **Document Decisions**: Explain why, not just what\n  92 \n  93 ## When Planning Refactors\n  94 \n  95 1. Identify code smells and technical debt\n  96 2. List specific improvements needed\n  97 3. Preserve existing functionality\n  98 4. Create backwards-compatible changes when possible\n  99 5. Plan for gradual migration if needed\n 100 \n 101 ## Red Flags to Check\n 102 \n 103 - Large functions (>50 lines)\n 104 - Deep nesting (>4 levels)\n 105 - Duplicated code\n 106 - Missing error handling\n 107 - Hardcoded values\n 108 - Missing tests\n 109 - Performance bottlenecks\n 110 \n 111 **Remember**: A great plan is specific, actionable, and considers both the happy path and edge cases. The best plans enable confident, incremental implementation.\n 112 \n````",
+                        "Successfully opened subagents/go-build-resolver.md:\n\n````markdown\n   0 # Go Build Error Resolver\n   1 \n   2 You are an expert Go build error resolution specialist. Your mission is to fix Go build errors, `go vet` issues, and linter warnings with **minimal, surgical changes**.\n   3 \n   4 ## Core Responsibilities\n   5 \n   6 1. Diagnose Go compilation errors\n...\n  12 ## Diagnostic Commands\n  13 \n...\n  16 ```bash\n...\n  35 ## Common Error Patterns & Fixes\n  36 \n  37 ### 1. Undefined Identifier\n  38 \n...\n  59 ### 2. Type Mismatch\n  60 \n...\n  83 ### 3. Interface Not Satisfied\n  84 \n...\n 106 ### 4. Import Cycle\n 107 \n...\n 130 ### 5. Cannot Find Package\n 131 \n...\n 147 ### 6. Missing Return\n 148 \n...\n 161 ### 7. Unused Variable/Import\n 162 \n...\n 177 ### 8. Multiple-Value in Single-Value Context\n 178 \n...\n 196 ## Module Issues\n 197 \n 198 ### Replace Directive Problems\n 199 \n...\n 208 ### Version Conflicts\n 209 \n...\n 221 ### Checksum Mismatch\n 222 \n...\n 231 ## Go Vet Issues\n 232 \n 233 ### Suspicious Constructs\n 234 \n...\n 253 ## Fix Strategy\n 254 \n 255 1. **Read the full error message** - Go errors are descriptive\n...\n 262 ## Resolution Workflow\n 263 \n 264 ```text\n...\n 286 ## Stop Conditions\n 287 \n...\n 295 ## Output Format\n 296 \n...\n 299 ```text\n...\n 308 ```text\n...\n 316 ## Important Notes\n 317 \n...\n 325 \n````"
+                    ],
+                    "tool_call_id": "toolu_vrtx_01SMhA5aiCjknJTKbin3L1ZH",
+                    "metadata": null,
+                    "timestamp": "2026-03-31T09:18:05.906800Z",
+                    "part_kind": "tool-return"
+                },
+                {
+                    "content": "\n\nYou have used 1 iterations.",
+                    "timestamp": "2026-03-31T09:18:06.123683Z",
+                    "part_kind": "user-prompt"
+                },
+                {
+                    "content": "<system-reminder>\nCurrent time: Tuesday, 2026-03-31 09:18:06\n</system-reminder>",
+                    "timestamp": "2026-03-31T09:18:06.124622Z",
+                    "part_kind": "user-prompt"
+                }
+            ],
+            "timestamp": "2026-03-31T09:18:06.124869Z",
+            "instructions": null,
+            "kind": "request",
+            "run_id": "4903c39c-c5b9-4131-a873-3dfbd14e5eb9",
+            "metadata": null
+        },
+        {
+            "parts": [
+                {
+                    "content": "Now I can see the issue clearly. All these subagent files are missing the required YAML frontmatter. I need to add proper frontmatter to each file. Let me fix all of them simultaneously.",
+                    "id": null,
+                    "provider_name": null,
+                    "provider_details": null,
+                    "part_kind": "text"
+                },
+                {
+                    "tool_name": "update_todo",
+                    "args": "{\"merge\": false, \"todos\": [{\"id\":1,\"status\":\"in_progress\",\"content\":\"Fix frontmatter in all 14 subagent files\",\"active_form\":\"Fixing frontmatter in all 14 subagent files\"}]}",
+                    "tool_call_id": "toolu_vrtx_011uBp3YGVTkkjKbH2EPcQZe",
+                    "id": null,
+                    "provider_name": null,
+                    "provider_details": null,
+                    "part_kind": "tool-call"
+                },
+                {
+                    "tool_name": "find_and_replace_code",
+                    "args": "{\"file_path\": \"subagents/doc-updater.md\", \"find\": \"# Documentation & Codemap Specialist\\n\\nYou are a documentation specialist\", \"replace\": \"---\\nname: doc-updater\\ndescription: Keeps codemaps and documentation current with the codebase\\ntools:\\n  - open_files\\n  - expand_code_chunks\\n  - grep\\n  - bash\\n  - find_and_replace_code\\n  - create_file\\n---\\n\\n# Documentation & Codemap Specialist\\n\\nYou are a documentation specialist\"}",
+                    "tool_call_id": "toolu_vrtx_016WfiuT4bPuHY9nSkb5UQaK",
+                    "id": null,
+                    "provider_name": null,
+                    "provider_details": null,
+                    "part_kind": "tool-call"
+                }
+            ],
+            "usage": {
+                "input_tokens": 27185,
+                "cache_write_tokens": 13642,
+                "cache_read_tokens": 13540,
+                "output_tokens": 351,
+                "input_audio_tokens": 0,
+                "cache_audio_read_tokens": 0,
+                "output_audio_tokens": 0,
+                "details": {
+                    "cache_creation_input_tokens": 13642,
+                    "cache_read_input_tokens": 13540,
+                    "input_tokens": 3,
+                    "output_tokens": 351
+                }
+            },
+            "model_name": "claude-sonnet-4-6",
+            "timestamp": "2026-03-31T09:18:07.182194Z",
+            "kind": "response",
+            "provider_name": "anthropic",
+            "provider_url": "https://api.atlassian.com/rovodev/v2/proxy/ai/v1/google/v1/",
+            "provider_details": {
+                "finish_reason": "tool_use"
+            },
+            "provider_response_id": "msg_vrtx_01GUk8FNMv61MzxKtxBMWPr5",
+            "finish_reason": "tool_call",
+            "run_id": "4903c39c-c5b9-4131-a873-3dfbd14e5eb9",
+            "metadata": null
+        },
+        {
+            "parts": [
+                {
+                    "tool_name": "update_todo",
+                    "content": "Successfully replaced existing todos. Total: 1 tasks (1 in_progress).\n\n<todo>\n{\"id\":1,\"content\":\"Fix frontmatter in all 14 subagent files\",\"active_form\":\"Fixing frontmatter in all 14 subagent files\",\"status\":\"in_progress\"}\n</todo>",
+                    "tool_call_id": "toolu_vrtx_011uBp3YGVTkkjKbH2EPcQZe",
+                    "metadata": null,
+                    "timestamp": "2026-03-31T09:18:31.179283Z",
+                    "part_kind": "tool-return"
+                },
+                {
+                    "tool_name": "find_and_replace_code",
+                    "content": "Successfully replaced code in subagents/doc-updater.md:\n\n--- subagents/doc-updater.md\n+++ subagents/doc-updater.md\n@@ -1,3 +1,15 @@\n+---\n+name: doc-updater\n+description: Keeps codemaps and documentation current with the codebase\n+tools:\n+  - open_files\n+  - expand_code_chunks\n+  - grep\n+  - bash\n+  - find_and_replace_code\n+  - create_file\n+---\n+\n # Documentation & Codemap Specialist\n \n You are a documentation specialist focused on keeping codemaps and documentation current with the codebase. Your mission is to maintain accurate, up-to-date documentation that reflects the actual state of the code.\n",
+                    "tool_call_id": "toolu_vrtx_016WfiuT4bPuHY9nSkb5UQaK",
+                    "metadata": null,
+                    "timestamp": "2026-03-31T09:18:31.208139Z",
+                    "part_kind": "tool-return"
+                },
+                {
+                    "content": "\n\nYou have used 2 iterations.",
+                    "timestamp": "2026-03-31T09:18:31.239179Z",
+                    "part_kind": "user-prompt"
+                },
+                {
+                    "content": "<system-reminder>\nCurrent time: Tuesday, 2026-03-31 09:18:31\n</system-reminder>",
+                    "timestamp": "2026-03-31T09:18:31.239960Z",
+                    "part_kind": "user-prompt"
+                }
+            ],
+            "timestamp": "2026-03-31T09:18:31.240156Z",
+            "instructions": null,
+            "kind": "request",
+            "run_id": "4903c39c-c5b9-4131-a873-3dfbd14e5eb9",
+            "metadata": null
+        },
+        {
+            "parts": [
+                {
+                    "content": "Now let me fix all the remaining 13 files simultaneously:",
+                    "id": null,
+                    "provider_name": null,
+                    "provider_details": null,
+                    "part_kind": "text"
+                },
+                {
+                    "tool_name": "find_and_replace_code",
+                    "args": "{\"file_path\": \"subagents/tdd-guide.md\", \"find\": \"You are a Test-Driven Development (TDD) specialist\", \"replace\": \"---\\nname: tdd-guide\\ndescription: Enforces test-driven development with comprehensive coverage\\ntools:\\n  - open_files\\n  - expand_code_chunks\\n  - grep\\n  - bash\\n  - find_and_replace_code\\n  - create_file\\n---\\n\\nYou are a Test-Driven Development (TDD) specialist\"}",
+                    "tool_call_id": "toolu_vrtx_015kWMtoq1R5ueiQRSyZVPY2",
+                    "id": null,
+                    "provider_name": null,
+                    "provider_details": null,
+                    "part_kind": "tool-call"
+                },
+                {
+                    "tool_name": "find_and_replace_code",
+                    "args": "{\"file_path\": \"subagents/security-reviewer.md\", \"find\": \"# Security Reviewer\\n\\nYou are an expert security specialist\", \"replace\": \"---\\nname: security-reviewer\\ndescription: Identifies and remediates security vulnerabilities in web applications\\ntools:\\n  - open_files\\n  - expand_code_chunks\\n  - grep\\n  - bash\\n  - find_and_replace_code\\n---\\n\\n# Security Reviewer\\n\\nYou are an expert security specialist\"}",
+                    "tool_call_id": "toolu_vrtx_01W7jbSK8MZ3EisbWbCReMZ2",
+                    "id": null,
+                    "provider_name": null,
+                    "provider_details": null,
+                    "part_kind": "tool-call"
+                },
+                {
+                    "tool_name": "find_and_replace_code",
+                    "args": "{\"file_path\": \"subagents/code-reviewer.md\", \"find\": \"You are a senior code reviewer ensuring high standards of code quality and security.\", \"replace\": \"---\\nname: code-reviewer\\ndescription: Reviews code and suggests improvements for quality and security\\ntools:\\n  - open_files\\n  - expand_code_chunks\\n  - grep\\n  - bash\\n---\\n\\nYou are a senior code reviewer ensuring high standards of code quality and security.\"}",
+                    "tool_call_id": "toolu_vrtx_01QvuTyECwMM8CSxnoQntyiQ",
+                    "id": null,
+                    "provider_name": null,
+                    "provider_details": null,
+                    "part_kind": "tool-call"
+                },
+                {
+                    "tool_name": "find_and_replace_code",
+                    "args": "{\"file_path\": \"subagents/build-error-resolver.md\", \"find\": \"# Build Error Resolver\\n\\nYou are an expert build error resolution specialist\", \"replace\": \"---\\nname: build-error-resolver\\ndescription: Fixes TypeScript, compilation, and build errors quickly with minimal changes\\ntools:\\n  - open_files\\n  - expand_code_chunks\\n  - grep\\n  - bash\\n  - find_and_replace_code\\n---\\n\\n# Build Error Resolver\\n\\nYou are an expert build error resolution specialist\"}",
+                    "tool_call_id": "toolu_vrtx_01XQiU4ADGKeEtbJfZfLsLRn",
+                    "id": null,
+                    "provider_name": null,
+                    "provider_details": null,
+                    "part_kind": "tool-call"
+                },
+                {
+                    "tool_name": "find_and_replace_code",
+                    "args": "{\"file_path\": \"subagents/pro-prompts-enhanced.md\", \"find\": \"You are a world-class prompt engineering specialist.\", \"replace\": \"---\\nname: pro-prompts-enhanced\\ndescription: Crafts, compares, and optimizes prompts for better LLM results\\ntools:\\n  - open_files\\n  - expand_code_chunks\\n  - grep\\n  - bash\\n---\\n\\nYou are a world-class prompt engineering specialist.\"}",
+                    "tool_call_id": "toolu_vrtx_013XwNbHC9y9B3avjfaxHftq",
+                    "id": null,
+                    "provider_name": null,
+                    "provider_details": null,
+                    "part_kind": "tool-call"
+                },
+                {
+                    "tool_name": "find_and_replace_code",
+                    "args": "{\"file_path\": \"subagents/solution-ranker.md\", \"find\": \"You are a world-class solution engineering specialist.\", \"replace\": \"---\\nname: solution-ranker\\ndescription: Generates and ranks solution variants to recommend the optimal approach\\ntools:\\n  - open_files\\n  - expand_code_chunks\\n  - grep\\n  - bash\\n  - find_and_replace_code\\n  - create_file\\n---\\n\\nYou are a world-class solution engineering specialist.\"}",
+                    "tool_call_id": "toolu_vrtx_01WQSDMJCc8x9LG27JDVYpmP",
+                    "id": null,
+                    "provider_name": null,
+                    "provider_details": null,
+                    "part_kind": "tool-call"
+                },
+                {
+                    "tool_name": "find_and_replace_code",
+                    "args": "{\"file_path\": \"subagents/architect.md\", \"find\": \"You are a senior software architect specializing in scalable, maintainable system design.\", \"replace\": \"---\\nname: architect\\ndescription: Designs scalable system architecture and evaluates technical trade-offs\\ntools:\\n  - open_files\\n  - expand_code_chunks\\n  - grep\\n  - bash\\n  - create_file\\n---\\n\\nYou are a senior software architect specializing in scalable, maintainable system design.\"}",
+                    "tool_call_id": "toolu_vrtx_01873AYwmub8gdykZR1zVDZK",
+                    "id": null,
+                    "provider_name": null,
+                    "provider_details": null,
+                    "part_kind": "tool-call"
+                },
+                {
+                    "tool_name": "find_and_replace_code",
+                    "args": "{\"file_path\": \"subagents/database-reviewer.md\", \"find\": \"# Database Reviewer\\n\\nYou are an expert PostgreSQL database specialist\", \"replace\": \"---\\nname: database-reviewer\\ndescription: Reviews database queries, schema design, security, and performance\\ntools:\\n  - open_files\\n  - expand_code_chunks\\n  - grep\\n  - bash\\n  - find_and_replace_code\\n---\\n\\n# Database Reviewer\\n\\nYou are an expert PostgreSQL database specialist\"}",
+                    "tool_call_id": "toolu_vrtx_015g5QqQefTZ9BiEDoQuPPg9",
+                    "id": null,
+                    "provider_name": null,
+                    "provider_details": null,
+                    "part_kind": "tool-call"
+                },
+                {
+                    "tool_name": "find_and_replace_code",
+                    "args": "{\"file_path\": \"subagents/e2e-runner.md\", \"find\": \"# E2E Test Runner\\n\\nYou are an expert end-to-end testing specialist.\", \"replace\": \"---\\nname: e2e-runner\\ndescription: Creates and executes comprehensive E2E tests for critical user journeys\\ntools:\\n  - open_files\\n  - expand_code_chunks\\n  - grep\\n  - bash\\n  - find_and_replace_code\\n  - create_file\\n---\\n\\n# E2E Test Runner\\n\\nYou are an expert end-to-end testing specialist.\"}",
+                    "tool_call_id": "toolu_vrtx_01XCYDKk2CDyEz6ZWztGGvUV",
+                    "id": null,
+                    "provider_name": null,
+                    "provider_details": null,
+                    "part_kind": "tool-call"
+                },
+                {
+                    "tool_name": "find_and_replace_code",
+                    "args": "{\"file_path\": \"subagents/refactor-cleaner.md\", \"find\": \"# Refactor & Dead Code Cleaner\\n\\nYou are an expert refactoring specialist\", \"replace\": \"---\\nname: refactor-cleaner\\ndescription: Identifies and removes dead code, duplicates, and unused exports\\ntools:\\n  - open_files\\n  - expand_code_chunks\\n  - grep\\n  - bash\\n  - find_and_replace_code\\n  - delete_file\\n---\\n\\n# Refactor & Dead Code Cleaner\\n\\nYou are an expert refactoring specialist\"}",
+                    "tool_call_id": "toolu_vrtx_01SRkyn3cvLVdbqitd7cYdyF",
+                    "id": null,
+                    "provider_name": null,
+                    "provider_details": null,
+                    "part_kind": "tool-call"
+                },
+                {
+                    "tool_name": "find_and_replace_code",
+                    "args": "{\"file_path\": \"subagents/go-reviewer.md\", \"find\": \"You are a senior Go code reviewer ensuring high standards of idiomatic Go and best practices.\", \"replace\": \"---\\nname: go-reviewer\\ndescription: Reviews Go code for idiomatic patterns, security, and best practices\\ntools:\\n  - open_files\\n  - expand_code_chunks\\n  - grep\\n  - bash\\n  - find_and_replace_code\\n---\\n\\nYou are a senior Go code reviewer ensuring high standards of idiomatic Go and best practices.\"}",
+                    "tool_call_id": "toolu_vrtx_01MQkbRBoH2umMHC3BiymyBP",
+                    "id": null,
+                    "provider_name": null,
+                    "provider_details": null,
+                    "part_kind": "tool-call"
+                },
+                {
+                    "tool_name": "find_and_replace_code",
+                    "args": "{\"file_path\": \"subagents/planner.md\", \"find\": \"You are an expert planning specialist focused on creating comprehensive, actionable implementation plans.\", \"replace\": \"---\\nname: planner\\ndescription: Creates comprehensive, actionable implementation plans for complex features\\ntools:\\n  - open_files\\n  - expand_code_chunks\\n  - grep\\n  - bash\\n---\\n\\nYou are an expert planning specialist focused on creating comprehensive, actionable implementation plans.\"}",
+                    "tool_call_id": "toolu_vrtx_013TMzywEfAoTyvfNPX3k9ir",
+                    "id": null,
+                    "provider_name": null,
+                    "provider_details": null,
+                    "part_kind": "tool-call"
+                },
+                {
+                    "tool_name": "find_and_replace_code",
+                    "args": "{\"file_path\": \"subagents/go-build-resolver.md\", \"find\": \"# Go Build Error Resolver\\n\\nYou are an expert Go build error resolution specialist.\", \"replace\": \"---\\nname: go-build-resolver\\ndescription: Fixes Go build errors, go vet issues, and linter warnings with minimal changes\\ntools:\\n  - open_files\\n  - expand_code_chunks\\n  - grep\\n  - bash\\n  - find_and_replace_code\\n---\\n\\n# Go Build Error Resolver\\n\\nYou are an expert Go build error resolution specialist.\"}",
+                    "tool_call_id": "toolu_vrtx_01K8r3RQTFWR2PztzesbLyx7",
+                    "id": null,
+                    "provider_name": null,
+                    "provider_details": null,
+                    "part_kind": "tool-call"
+                }
+            ],
+            "usage": {
+                "input_tokens": 27909,
+                "cache_write_tokens": 724,
+                "cache_read_tokens": 27182,
+                "output_tokens": 2270,
+                "input_audio_tokens": 0,
+                "cache_audio_read_tokens": 0,
+                "output_audio_tokens": 0,
+                "details": {
+                    "cache_creation_input_tokens": 724,
+                    "cache_read_input_tokens": 27182,
+                    "input_tokens": 3,
+                    "output_tokens": 2270
+                }
+            },
+            "model_name": "claude-sonnet-4-6",
+            "timestamp": "2026-03-31T09:18:32.109531Z",
+            "kind": "response",
+            "provider_name": "anthropic",
+            "provider_url": "https://api.atlassian.com/rovodev/v2/proxy/ai/v1/google/v1/",
+            "provider_details": {
+                "finish_reason": "tool_use"
+            },
+            "provider_response_id": "msg_vrtx_01Q6HCcji5s7FoVRf6WNkyCh",
+            "finish_reason": "tool_call",
+            "run_id": "4903c39c-c5b9-4131-a873-3dfbd14e5eb9",
+            "metadata": null
+        },
+        {
+            "parts": [
+                {
+                    "tool_name": "find_and_replace_code",
+                    "content": "Successfully replaced code in subagents/tdd-guide.md:\n\n--- subagents/tdd-guide.md\n+++ subagents/tdd-guide.md\n@@ -1,3 +1,15 @@\n+---\n+name: tdd-guide\n+description: Enforces test-driven development with comprehensive coverage\n+tools:\n+  - open_files\n+  - expand_code_chunks\n+  - grep\n+  - bash\n+  - find_and_replace_code\n+  - create_file\n+---\n+\n You are a Test-Driven Development (TDD) specialist who ensures all code is developed test-first with comprehensive coverage.\n \n ## Your Role\n",
+                    "tool_call_id": "toolu_vrtx_015kWMtoq1R5ueiQRSyZVPY2",
+                    "metadata": null,
+                    "timestamp": "2026-03-31T09:18:55.166155Z",
+                    "part_kind": "tool-return"
+                },
+                {
+                    "tool_name": "find_and_replace_code",
+                    "content": "Successfully replaced code in subagents/security-reviewer.md:\n\n--- subagents/security-reviewer.md\n+++ subagents/security-reviewer.md\n@@ -1,3 +1,14 @@\n+---\n+name: security-reviewer\n+description: Identifies and remediates security vulnerabilities in web applications\n+tools:\n+  - open_files\n+  - expand_code_chunks\n+  - grep\n+  - bash\n+  - find_and_replace_code\n+---\n+\n # Security Reviewer\n \n You are an expert security specialist focused on identifying and remediating vulnerabilities in web applications. Your mission is to prevent security issues before they reach production by conducting thorough security reviews of code, configurations, and dependencies.\n",
+                    "tool_call_id": "toolu_vrtx_01W7jbSK8MZ3EisbWbCReMZ2",
+                    "metadata": null,
+                    "timestamp": "2026-03-31T09:18:55.199309Z",
+                    "part_kind": "tool-return"
+                },
+                {
+                    "tool_name": "find_and_replace_code",
+                    "content": "Successfully replaced code in subagents/code-reviewer.md:\n\n--- subagents/code-reviewer.md\n+++ subagents/code-reviewer.md\n@@ -1,3 +1,13 @@\n+---\n+name: code-reviewer\n+description: Reviews code and suggests improvements for quality and security\n+tools:\n+  - open_files\n+  - expand_code_chunks\n+  - grep\n+  - bash\n+---\n+\n You are a senior code reviewer ensuring high standards of code quality and security.\n \n When invoked:\n",
+                    "tool_call_id": "toolu_vrtx_01QvuTyECwMM8CSxnoQntyiQ",
+                    "metadata": null,
+                    "timestamp": "2026-03-31T09:18:55.238256Z",
+                    "part_kind": "tool-return"
+                },
+                {
+                    "tool_name": "find_and_replace_code",
+                    "content": "Successfully replaced code in subagents/build-error-resolver.md:\n\n--- subagents/build-error-resolver.md\n+++ subagents/build-error-resolver.md\n@@ -1,3 +1,14 @@\n+---\n+name: build-error-resolver\n+description: Fixes TypeScript, compilation, and build errors quickly with minimal changes\n+tools:\n+  - open_files\n+  - expand_code_chunks\n+  - grep\n+  - bash\n+  - find_and_replace_code\n+---\n+\n # Build Error Resolver\n \n You are an expert build error resolution specialist focused on fixing TypeScript, compilation, and build errors quickly and efficiently. Your mission is to get builds passing with minimal changes, no architectural modifications.\n",
+                    "tool_call_id": "toolu_vrtx_01XQiU4ADGKeEtbJfZfLsLRn",
+                    "metadata": null,
+                    "timestamp": "2026-03-31T09:18:55.274216Z",
+                    "part_kind": "tool-return"
+                },
+                {
+                    "tool_name": "find_and_replace_code",
+                    "content": "Successfully replaced code in subagents/pro-prompts-enhanced.md:\n\n--- subagents/pro-prompts-enhanced.md\n+++ subagents/pro-prompts-enhanced.md\n@@ -1,3 +1,13 @@\n+---\n+name: pro-prompts-enhanced\n+description: Crafts, compares, and optimizes prompts for better LLM results\n+tools:\n+  - open_files\n+  - expand_code_chunks\n+  - grep\n+  - bash\n+---\n+\n You are a world-class prompt engineering specialist. Your mission is to help users craft, compare, and optimize prompts that produce significantly better results from any LLM.\n \n ## Your Role\n",
+                    "tool_call_id": "toolu_vrtx_013XwNbHC9y9B3avjfaxHftq",
+                    "metadata": null,
+                    "timestamp": "2026-03-31T09:18:55.313169Z",
+                    "part_kind": "tool-return"
+                },
+                {
+                    "tool_name": "find_and_replace_code",
+                    "content": "Successfully replaced code in subagents/solution-ranker.md:\n\n--- subagents/solution-ranker.md\n+++ subagents/solution-ranker.md\n@@ -1,3 +1,15 @@\n+---\n+name: solution-ranker\n+description: Generates and ranks solution variants to recommend the optimal approach\n+tools:\n+  - open_files\n+  - expand_code_chunks\n+  - grep\n+  - bash\n+  - find_and_replace_code\n+  - create_file\n+---\n+\n You are a world-class solution engineering specialist. Your mission is to help developers produce the best possible code by generating multiple solution variants, scoring them rigorously, and recommending the optimal approach before any code is written.\n \n ## Your Role\n",
+                    "tool_call_id": "toolu_vrtx_01WQSDMJCc8x9LG27JDVYpmP",
+                    "metadata": null,
+                    "timestamp": "2026-03-31T09:18:55.346082Z",
+                    "part_kind": "tool-return"
+                },
+                {
+                    "tool_name": "find_and_replace_code",
+                    "content": "Successfully replaced code in subagents/architect.md:\n\n--- subagents/architect.md\n+++ subagents/architect.md\n@@ -1,3 +1,14 @@\n+---\n+name: architect\n+description: Designs scalable system architecture and evaluates technical trade-offs\n+tools:\n+  - open_files\n+  - expand_code_chunks\n+  - grep\n+  - bash\n+  - create_file\n+---\n+\n You are a senior software architect specializing in scalable, maintainable system design.\n \n ## Your Role\n",
+                    "tool_call_id": "toolu_vrtx_01873AYwmub8gdykZR1zVDZK",
+                    "metadata": null,
+                    "timestamp": "2026-03-31T09:18:55.363610Z",
+                    "part_kind": "tool-return"
+                },
+                {
+                    "tool_name": "find_and_replace_code",
+                    "content": "Successfully replaced code in subagents/database-reviewer.md:\n\n--- subagents/database-reviewer.md\n+++ subagents/database-reviewer.md\n@@ -1,3 +1,14 @@\n+---\n+name: database-reviewer\n+description: Reviews database queries, schema design, security, and performance\n+tools:\n+  - open_files\n+  - expand_code_chunks\n+  - grep\n+  - bash\n+  - find_and_replace_code\n+---\n+\n # Database Reviewer\n \n You are an expert PostgreSQL database specialist focused on query optimization, schema design, security, and performance. Your mission is to ensure database code follows best practices, prevents performance issues, and maintains data integrity. This agent incorporates patterns from Supabase's postgres-best-practices.\n",
+                    "tool_call_id": "toolu_vrtx_015g5QqQefTZ9BiEDoQuPPg9",
+                    "metadata": null,
+                    "timestamp": "2026-03-31T09:18:55.366421Z",
+                    "part_kind": "tool-return"
+                },
+                {
+                    "tool_name": "find_and_replace_code",
+                    "content": "Successfully replaced code in subagents/e2e-runner.md:\n\n--- subagents/e2e-runner.md\n+++ subagents/e2e-runner.md\n@@ -1,3 +1,15 @@\n+---\n+name: e2e-runner\n+description: Creates and executes comprehensive E2E tests for critical user journeys\n+tools:\n+  - open_files\n+  - expand_code_chunks\n+  - grep\n+  - bash\n+  - find_and_replace_code\n+  - create_file\n+---\n+\n # E2E Test Runner\n \n You are an expert end-to-end testing specialist. Your mission is to ensure critical user journeys work correctly by creating, maintaining, and executing comprehensive E2E tests with proper artifact management and flaky test handling.\n",
+                    "tool_call_id": "toolu_vrtx_01XCYDKk2CDyEz6ZWztGGvUV",
+                    "metadata": null,
+                    "timestamp": "2026-03-31T09:18:55.368693Z",
+                    "part_kind": "tool-return"
+                },
+                {
+                    "tool_name": "find_and_replace_code",
+                    "content": "Successfully replaced code in subagents/refactor-cleaner.md:\n\n--- subagents/refactor-cleaner.md\n+++ subagents/refactor-cleaner.md\n@@ -1,3 +1,15 @@\n+---\n+name: refactor-cleaner\n+description: Identifies and removes dead code, duplicates, and unused exports\n+tools:\n+  - open_files\n+  - expand_code_chunks\n+  - grep\n+  - bash\n+  - find_and_replace_code\n+  - delete_file\n+---\n+\n # Refactor & Dead Code Cleaner\n \n You are an expert refactoring specialist focused on code cleanup and consolidation. Your mission is to identify and remove dead code, duplicates, and unused exports to keep the codebase lean and maintainable.\n",
+                    "tool_call_id": "toolu_vrtx_01SRkyn3cvLVdbqitd7cYdyF",
+                    "metadata": null,
+                    "timestamp": "2026-03-31T09:18:55.371013Z",
+                    "part_kind": "tool-return"
+                },
+                {
+                    "tool_name": "find_and_replace_code",
+                    "content": "Successfully replaced code in subagents/go-reviewer.md:\n\n--- subagents/go-reviewer.md\n+++ subagents/go-reviewer.md\n@@ -1,3 +1,14 @@\n+---\n+name: go-reviewer\n+description: Reviews Go code for idiomatic patterns, security, and best practices\n+tools:\n+  - open_files\n+  - expand_code_chunks\n+  - grep\n+  - bash\n+  - find_and_replace_code\n+---\n+\n You are a senior Go code reviewer ensuring high standards of idiomatic Go and best practices.\n \n When invoked:\n",
+                    "tool_call_id": "toolu_vrtx_01MQkbRBoH2umMHC3BiymyBP",
+                    "metadata": null,
+                    "timestamp": "2026-03-31T09:18:55.372986Z",
+                    "part_kind": "tool-return"
+                },
+                {
+                    "tool_name": "find_and_replace_code",
+                    "content": "Successfully replaced code in subagents/planner.md:\n\n--- subagents/planner.md\n+++ subagents/planner.md\n@@ -1,3 +1,13 @@\n+---\n+name: planner\n+description: Creates comprehensive, actionable implementation plans for complex features\n+tools:\n+  - open_files\n+  - expand_code_chunks\n+  - grep\n+  - bash\n+---\n+\n You are an expert planning specialist focused on creating comprehensive, actionable implementation plans.\n \n ## Your Role\n",
+                    "tool_call_id": "toolu_vrtx_013TMzywEfAoTyvfNPX3k9ir",
+                    "metadata": null,
+                    "timestamp": "2026-03-31T09:18:55.375999Z",
+                    "part_kind": "tool-return"
+                },
+                {
+                    "tool_name": "find_and_replace_code",
+                    "content": "Successfully replaced code in subagents/go-build-resolver.md:\n\n--- subagents/go-build-resolver.md\n+++ subagents/go-build-resolver.md\n@@ -1,3 +1,14 @@\n+---\n+name: go-build-resolver\n+description: Fixes Go build errors, go vet issues, and linter warnings with minimal changes\n+tools:\n+  - open_files\n+  - expand_code_chunks\n+  - grep\n+  - bash\n+  - find_and_replace_code\n+---\n+\n # Go Build Error Resolver\n \n You are an expert Go build error resolution specialist. Your mission is to fix Go build errors, `go vet` issues, and linter warnings with **minimal, surgical changes**.\n",
+                    "tool_call_id": "toolu_vrtx_01K8r3RQTFWR2PztzesbLyx7",
+                    "metadata": null,
+                    "timestamp": "2026-03-31T09:18:55.379679Z",
+                    "part_kind": "tool-return"
+                },
+                {
+                    "content": "\n\nYou have used 3 iterations.",
+                    "timestamp": "2026-03-31T09:18:55.978342Z",
+                    "part_kind": "user-prompt"
+                },
+                {
+                    "content": "<system_reminder>\nTodo status: 'Fix frontmatter in all 14 subagent files' in progress. Update the list with current progress.\n</system_reminder>",
+                    "timestamp": "2026-03-31T09:18:55.979401Z",
+                    "part_kind": "user-prompt"
+                },
+                {
+                    "content": "<system-reminder>\nCurrent time: Tuesday, 2026-03-31 09:18:55\n</system-reminder>",
+                    "timestamp": "2026-03-31T09:18:55.979463Z",
+                    "part_kind": "user-prompt"
+                }
+            ],
+            "timestamp": "2026-03-31T09:18:55.979673Z",
+            "instructions": null,
+            "kind": "request",
+            "run_id": "4903c39c-c5b9-4131-a873-3dfbd14e5eb9",
+            "metadata": null
+        },
+        {
+            "parts": [
+                {
+                    "content": "All 14 files have been fixed successfully!",
+                    "id": null,
+                    "provider_name": null,
+                    "provider_details": null,
+                    "part_kind": "text"
+                },
+                {
+                    "tool_name": "update_todo",
+                    "args": "{\"merge\": true, \"todos\": [{\"id\":1,\"status\":\"completed\"}]}",
+                    "tool_call_id": "toolu_vrtx_01EAtWaYHxGJyrgUKp9qkkeZ",
+                    "id": null,
+                    "provider_name": null,
+                    "provider_details": null,
+                    "part_kind": "tool-call"
+                }
+            ],
+            "usage": {
+                "input_tokens": 32896,
+                "cache_write_tokens": 24826,
+                "cache_read_tokens": 8067,
+                "output_tokens": 94,
+                "input_audio_tokens": 0,
+                "cache_audio_read_tokens": 0,
+                "output_audio_tokens": 0,
+                "details": {
+                    "cache_creation_input_tokens": 24826,
+                    "cache_read_input_tokens": 8067,
+                    "input_tokens": 3,
+                    "output_tokens": 94
+                }
+            },
+            "model_name": "claude-sonnet-4-6",
+            "timestamp": "2026-03-31T09:18:57.023272Z",
+            "kind": "response",
+            "provider_name": "anthropic",
+            "provider_url": "https://api.atlassian.com/rovodev/v2/proxy/ai/v1/google/v1/",
+            "provider_details": {
+                "finish_reason": "tool_use"
+            },
+            "provider_response_id": "msg_vrtx_01QGR7n5Vw3becGqyDRWBv1X",
+            "finish_reason": "tool_call",
+            "run_id": "4903c39c-c5b9-4131-a873-3dfbd14e5eb9",
+            "metadata": null
+        },
+        {
+            "parts": [
+                {
+                    "tool_name": "update_todo",
+                    "content": "Successfully merged with existing todos. Total: 1 tasks (1 completed).\n\n<todo>\n{\"id\":1,\"content\":\"Fix frontmatter in all 14 subagent files\",\"active_form\":\"Fixing frontmatter in all 14 subagent files\",\"status\":\"completed\"}\n</todo>",
+                    "tool_call_id": "toolu_vrtx_01EAtWaYHxGJyrgUKp9qkkeZ",
+                    "metadata": null,
+                    "timestamp": "2026-03-31T09:18:58.376415Z",
+                    "part_kind": "tool-return"
+                },
+                {
+                    "content": "\n\nYou have used 4 iterations.",
+                    "timestamp": "2026-03-31T09:18:58.395708Z",
+                    "part_kind": "user-prompt"
+                },
+                {
+                    "content": "<system-reminder>\nCurrent time: Tuesday, 2026-03-31 09:18:58\n</system-reminder>",
+                    "timestamp": "2026-03-31T09:18:58.396711Z",
+                    "part_kind": "user-prompt"
+                }
+            ],
+            "timestamp": "2026-03-31T09:18:58.396913Z",
+            "instructions": null,
+            "kind": "request",
+            "run_id": "4903c39c-c5b9-4131-a873-3dfbd14e5eb9",
+            "metadata": null
+        },
+        {
+            "parts": [
+                {
+                    "content": "All 14 subagent files have been fixed! Here's a summary of what was done:\n\nEach file now has valid YAML frontmatter with:\n- `name` — a kebab-case identifier matching the filename\n- `description` — a concise description of the subagent's purpose\n- `tools` — the relevant tools each subagent needs to do its job\n\n**Files fixed:**\n| File | Name |\n|------|------|\n| `doc-updater.md` | `doc-updater` |\n| `tdd-guide.md` | `tdd-guide` |\n| `security-reviewer.md` | `security-reviewer` |\n| `code-reviewer.md` | `code-reviewer` |\n| `build-error-resolver.md` | `build-error-resolver` |\n| `pro-prompts-enhanced.md` | `pro-prompts-enhanced` |\n| `solution-ranker.md` | `solution-ranker` |\n| `architect.md` | `architect` |\n| `database-reviewer.md` | `database-reviewer` |\n| `e2e-runner.md` | `e2e-runner` |\n| `refactor-cleaner.md` | `refactor-cleaner` |\n| `go-reviewer.md` | `go-reviewer` |\n| `planner.md` | `planner` |\n| `go-build-resolver.md` | `go-build-resolver` |\n\nWould you like me to:\n1. **Verify** the fixes by reviewing any of the files\n2. **Add more tools** to specific subagents if needed\n3. **Anything else** in your workspace?",
+                    "id": null,
+                    "provider_name": null,
+                    "provider_details": null,
+                    "part_kind": "text"
+                }
+            ],
+            "usage": {
+                "input_tokens": 33115,
+                "cache_write_tokens": 219,
+                "cache_read_tokens": 32893,
+                "output_tokens": 399,
+                "input_audio_tokens": 0,
+                "cache_audio_read_tokens": 0,
+                "output_audio_tokens": 0,
+                "details": {
+                    "cache_creation_input_tokens": 219,
+                    "cache_read_input_tokens": 32893,
+                    "input_tokens": 3,
+                    "output_tokens": 399
+                }
+            },
+            "model_name": "claude-sonnet-4-6",
+            "timestamp": "2026-03-31T09:18:59.379081Z",
+            "kind": "response",
+            "provider_name": "anthropic",
+            "provider_url": "https://api.atlassian.com/rovodev/v2/proxy/ai/v1/google/v1/",
+            "provider_details": {
+                "finish_reason": "end_turn"
+            },
+            "provider_response_id": "msg_vrtx_01WxbWNeWuuxzpctx2aVRmdV",
+            "finish_reason": "stop",
+            "run_id": "4903c39c-c5b9-4131-a873-3dfbd14e5eb9",
+            "metadata": null
+        }
+    ],
+    "deferred_results": null,
+    "usage": {
+        "input_tokens": 146189,
+        "cache_write_tokens": 60293,
+        "cache_read_tokens": 85878,
+        "output_tokens": 3492,
+        "input_audio_tokens": 0,
+        "cache_audio_read_tokens": 0,
+        "output_audio_tokens": 0,
+        "details": {
+            "cache_creation_input_tokens": 60293,
+            "cache_read_input_tokens": 85878,
+            "input_tokens": 18,
+            "output_tokens": 3492
+        },
+        "requests": 6,
+        "tool_calls": 17
+    },
+    "timestamp": 1774948344,
+    "initial_prompt": "fix: ",
+    "prompts": [
+        "fix: ",
+        "fix: \nError: Invalid frontmatter in /root/.rovodev/subagents/doc-updater.md.\nSubagent definitions should use the following format:\n---\nname: code-reviewer\ndescription: Reviews code and suggests improvements\nmodel: anthropic.claude-3-5-sonnet-20241022-v2:0  # Optional: specify a model \nfor this subagent\ntools:\n  - open_files\n  - expand_code_chunks\n  - grep\n  - bash\n---\nYou are an agent that reviews code and suggests improvements.\n\nError: Invalid frontmatter in /root/.rovodev/subagents/tdd-guide.md.\nSubagent definitions should use the following format:\n---\nname: code-reviewer\ndescription: Reviews code and suggests improvements\nmodel: anthropic.claude-3-5-sonnet-20241022-v2:0  # Optional: specify a model \nfor this subagent\ntools:\n  - open_files\n  - expand_code_chunks\n  - grep\n  - bash\n---\nYou are an agent that reviews code and suggests improvements.\n\nError: Invalid frontmatter in /root/.rovodev/subagents/security-reviewer.md.\nSubagent definitions should use the following format:\n---\nname: code-reviewer\ndescription: Reviews code and suggests improvements\nmodel: anthropic.claude-3-5-sonnet-20241022-v2:0  # Optional: specify a model \nfor this subagent\ntools:\n  - open_files\n  - expand_code_chunks\n  - grep\n  - bash\n---\nYou are an agent that reviews code and suggests improvements.\n\nError: Invalid frontmatter in /root/.rovodev/subagents/code-reviewer.md.\nSubagent definitions should use the following format:\n---\nname: code-reviewer\ndescription: Reviews code and suggests improvements\nmodel: anthropic.claude-3-5-sonnet-20241022-v2:0  # Optional: specify a model \nfor this subagent\ntools:\n  - open_files\n  - expand_code_chunks\n  - grep\n  - bash\n---\nYou are an agent that reviews code and suggests improvements.\n\nError: Invalid frontmatter in /root/.rovodev/subagents/build-error-resolver.md.\nSubagent definitions should use the following format:\n---\nname: code-reviewer\ndescription: Reviews code and suggests improvements\nmodel: anthropic.claude-3-5-sonnet-20241022-v2:0  # Optional: specify a model \nfor this subagent\ntools:\n  - open_files\n  - expand_code_chunks\n  - grep\n  - bash\n---\nYou are an agent that reviews code and suggests improvements.\n\nError: Invalid frontmatter in /root/.rovodev/subagents/pro-prompts-enhanced.md.\nSubagent definitions should use the following format:\n---\nname: code-reviewer\ndescription: Reviews code and suggests improvements\nmodel: anthropic.claude-3-5-sonnet-20241022-v2:0  # Optional: specify a model \nfor this subagent\ntools:\n  - open_files\n  - expand_code_chunks\n  - grep\n  - bash\n---\nYou are an agent that reviews code and suggests improvements.\n\nError: Invalid frontmatter in /root/.rovodev/subagents/solution-ranker.md.\nSubagent definitions should use the following format:\n---\nname: code-reviewer\ndescription: Reviews code and suggests improvements\nmodel: anthropic.claude-3-5-sonnet-20241022-v2:0  # Optional: specify a model \nfor this subagent\ntools:\n  - open_files\n  - expand_code_chunks\n  - grep\n  - bash\n---\nYou are an agent that reviews code and suggests improvements.\n\nError: Invalid frontmatter in /root/.rovodev/subagents/architect.md.\nSubagent definitions should use the following format:\n---\nname: code-reviewer\ndescription: Reviews code and suggests improvements\nmodel: anthropic.claude-3-5-sonnet-20241022-v2:0  # Optional: specify a model \nfor this subagent\ntools:\n  - open_files\n  - expand_code_chunks\n  - grep\n  - bash\n---\nYou are an agent that reviews code and suggests improvements.\n\nError: Invalid frontmatter in /root/.rovodev/subagents/database-reviewer.md.\nSubagent definitions should use the following format:\n---\nname: code-reviewer\ndescription: Reviews code and suggests improvements\nmodel: anthropic.claude-3-5-sonnet-20241022-v2:0  # Optional: specify a model \nfor this subagent\ntools:\n  - open_files\n  - expand_code_chunks\n  - grep\n  - bash\n---\nYou are an agent that reviews code and suggests improvements.\n\nError: Invalid frontmatter in /root/.rovodev/subagents/e2e-runner.md.\nSubagent definitions should use the following format:\n---\nname: code-reviewer\ndescription: Reviews code and suggests improvements\nmodel: anthropic.claude-3-5-sonnet-20241022-v2:0  # Optional: specify a model \nfor this subagent\ntools:\n  - open_files\n  - expand_code_chunks\n  - grep\n  - bash\n---\nYou are an agent that reviews code and suggests improvements.\n\nError: Invalid frontmatter in /root/.rovodev/subagents/refactor-cleaner.md.\nSubagent definitions should use the following format:\n---\nname: code-reviewer\ndescription: Reviews code and suggests improvements\nmodel: anthropic.claude-3-5-sonnet-20241022-v2:0  # Optional: specify a model \nfor this subagent\ntools:\n  - open_files\n  - expand_code_chunks\n  - grep\n  - bash\n---\nYou are an agent that reviews code and suggests improvements.\n\nError: Invalid frontmatter in /root/.rovodev/subagents/go-reviewer.md.\nSubagent definitions should use the following format:\n---\nname: code-reviewer\ndescription: Reviews code and suggests improvements\nmodel: anthropic.claude-3-5-sonnet-20241022-v2:0  # Optional: specify a model \nfor this subagent\ntools:\n  - open_files\n  - expand_code_chunks\n  - grep\n  - bash\n---\nYou are an agent that reviews code and suggests improvements.\n\nError: Invalid frontmatter in /root/.rovodev/subagents/planner.md.\nSubagent definitions should use the following format:\n---\nname: code-reviewer\ndescription: Reviews code and suggests improvements\nmodel: anthropic.claude-3-5-sonnet-20241022-v2:0  # Optional: specify a model \nfor this subagent\ntools:\n  - open_files\n  - expand_code_chunks\n  - grep\n  - bash\n---\nYou are an agent that reviews code and suggests improvements.\n\nError: Invalid frontmatter in /root/.rovodev/subagents/go-build-resolver.md.\nSubagent definitions should use the following format:\n---\nname: code-reviewer\ndescription: Reviews code and suggests improvements\nmodel: anthropic.claude-3-5-sonnet-20241022-v2:0  # Optional: specify a model \nfor this subagent\ntools:\n  - open_files\n  - expand_code_chunks\n  - grep\n  - bash\n---\nYou are an agent that reviews code and suggests improvements.\n✔ Using model: claude-sonnet-4-6"
+    ],
+    "latest_result": "All 14 subagent files have been fixed! Here's a summary of what was done:\n\nEach file now has valid YAML frontmatter with:\n- `name` — a kebab-case identifier matching the filename\n- `description` — a concise description of the subagent's purpose\n- `tools` — the relevant tools each subagent needs to do its job\n\n**Files fixed:**\n| File | Name |\n|------|------|\n| `doc-updater.md` | `doc-updater` |\n| `tdd-guide.md` | `tdd-guide` |\n| `security-reviewer.md` | `security-reviewer` |\n| `code-reviewer.md` | `code-reviewer` |\n| `build-error-resolver.md` | `build-error-resolver` |\n| `pro-prompts-enhanced.md` | `pro-prompts-enhanced` |\n| `solution-ranker.md` | `solution-ranker` |\n| `architect.md` | `architect` |\n| `database-reviewer.md` | `database-reviewer` |\n| `e2e-runner.md` | `e2e-runner` |\n| `refactor-cleaner.md` | `refactor-cleaner` |\n| `go-reviewer.md` | `go-reviewer` |\n| `planner.md` | `planner` |\n| `go-build-resolver.md` | `go-build-resolver` |\n\nWould you like me to:\n1. **Verify** the fixes by reviewing any of the files\n2. **Add more tools** to specific subagents if needed\n3. **Anything else** in your workspace?",
+    "workspace_path": "/root/.rovodev",
+    "base_log_dir": "/root/.rovodev/sessions",
+    "is_subagent": false,
+    "subagent_tool_call_id": null
+}
