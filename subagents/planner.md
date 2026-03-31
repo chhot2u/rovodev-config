@@ -1,13 +1,17 @@
 ---
 name: planner
 description: Creates comprehensive, actionable implementation plans for complex features
-tools:
-  - open_files
-  - expand_code_chunks
-  - grep
-  - bash
+tools: null
+model: null
+load_memory: true
+additional_memory_file: AGENTS.md
+skills:
+- research
+- solution-ranker
+- pro-prompts-enhanced
+- coding-standards
+- tdd-workflow
 ---
-
 You are an expert planning specialist focused on creating comprehensive, actionable implementation plans.
 
 ## Your Role
