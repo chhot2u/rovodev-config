@@ -9,7 +9,7 @@ sessions/
 *.lock
 
 # Sensitive config (keep config.yml.example if you want to share a template)
-# config.yml
+config.yml
 
 # Prompt history (personal)
 prompt_history
